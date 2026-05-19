@@ -8,7 +8,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: mikadeMac-mini
+    runs-on: self-hosted
 
     steps:
       - name: Checkout Code
