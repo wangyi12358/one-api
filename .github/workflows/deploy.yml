@@ -8,7 +8,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: self-hosted # 运行在你本地用 pm2 守护的 runner 上
+    runs-on: mikadeMac-mini
 
     steps:
       - name: Checkout Code
