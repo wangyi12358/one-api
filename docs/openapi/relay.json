@@ -1,0 +1,1765 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "One API AI 模型接口",
+    "description": "OpenAI 兼容的 AI 模型中继 API 文档",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {"name": "获取模型列表"},
+    {"name": "Chat Completions"},
+    {"name": "Completions"},
+    {"name": "图片生成"},
+    {"name": "Embeddings"},
+    {"name": "音频"},
+    {"name": "Moderations"},
+    {"name": "Files"},
+    {"name": "Fine-tunes"},
+    {"name": "Assistants"},
+    {"name": "Billing"}
+  ],
+  "paths": {
+    "/v1/models": {
+      "get": {
+        "summary": "获取模型列表",
+        "description": "获取当前用户可用的模型列表",
+        "operationId": "listModels",
+        "tags": ["获取模型列表"],
+        "security": [{"ApiKeyAuth": []}],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {"type": "string", "example": "list"},
+                    "data": {
+                      "type": "array",
+                      "items": {"$ref": "#/components/schemas/Model"}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/models/{model}": {
+      "get": {
+        "summary": "获取指定模型信息",
+        "operationId": "retrieveModel",
+        "tags": ["获取模型列表"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "model",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"},
+            "description": "模型 ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/Model"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/chat/completions": {
+      "post": {
+        "summary": "Chat Completions",
+        "description": "创建聊天补全，兼容 OpenAI Chat Completions API",
+        "operationId": "createChatCompletion",
+        "tags": ["Chat Completions"],
+        "security": [{"ApiKeyAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/ChatCompletionRequest"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ChatCompletionResponse"}
+              },
+              "text/event-stream": {
+                "schema": {
+                  "type": "string",
+                  "description": "SSE 流式响应"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/completions": {
+      "post": {
+        "summary": "Text Completions",
+        "description": "创建文本补全，兼容 OpenAI Completions API",
+        "operationId": "createCompletion",
+        "tags": ["Completions"],
+        "security": [{"ApiKeyAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/CompletionRequest"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/CompletionResponse"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/images/generations": {
+      "post": {
+        "summary": "生成图片",
+        "description": "根据提示词生成图片，兼容 OpenAI Images API",
+        "operationId": "createImage",
+        "tags": ["图片生成"],
+        "security": [{"ApiKeyAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/ImageRequest"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ImageResponse"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/embeddings": {
+      "post": {
+        "summary": "创建 Embeddings",
+        "description": "获取文本的向量表示，兼容 OpenAI Embeddings API",
+        "operationId": "createEmbedding",
+        "tags": ["Embeddings"],
+        "security": [{"ApiKeyAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/EmbeddingRequest"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/EmbeddingResponse"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/audio/transcriptions": {
+      "post": {
+        "summary": "音频转文字",
+        "description": "将音频转换为文字，兼容 OpenAI Audio Transcriptions API",
+        "operationId": "createTranscription",
+        "tags": ["音频"],
+        "security": [{"ApiKeyAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "音频文件"
+                  },
+                  "model": {
+                    "type": "string",
+                    "description": "模型 ID，如 whisper-1"
+                  },
+                  "language": {
+                    "type": "string",
+                    "description": "音频语言，ISO-639-1 格式"
+                  },
+                  "prompt": {
+                    "type": "string",
+                    "description": "提示词"
+                  },
+                  "response_format": {
+                    "type": "string",
+                    "enum": ["json", "text", "srt", "verbose_json", "vtt"],
+                    "default": "json"
+                  },
+                  "temperature": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "default": 0
+                  }
+                },
+                "required": ["file", "model"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "text": {"type": "string"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/audio/translations": {
+      "post": {
+        "summary": "音频翻译",
+        "description": "将音频翻译为英文，兼容 OpenAI Audio Translations API",
+        "operationId": "createTranslation",
+        "tags": ["音频"],
+        "security": [{"ApiKeyAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "model": {
+                    "type": "string",
+                    "default": "whisper-1"
+                  },
+                  "prompt": {"type": "string"},
+                  "response_format": {
+                    "type": "string",
+                    "enum": ["json", "text", "srt", "verbose_json", "vtt"],
+                    "default": "json"
+                  },
+                  "temperature": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "default": 0
+                  }
+                },
+                "required": ["file", "model"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/v1/audio/speech": {
+      "post": {
+        "summary": "文字转语音",
+        "description": "将文字转换为语音，兼容 OpenAI Audio Speech API",
+        "operationId": "createSpeech",
+        "tags": ["音频"],
+        "security": [{"ApiKeyAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "model": {
+                    "type": "string",
+                    "description": "模型 ID，如 tts-1"
+                  },
+                  "input": {
+                    "type": "string",
+                    "description": "要转换的文字"
+                  },
+                  "voice": {
+                    "type": "string",
+                    "enum": ["alloy", "echo", "fable", "onyx", "nova", "shimmer"],
+                    "description": "语音类型"
+                  },
+                  "response_format": {
+                    "type": "string",
+                    "enum": ["mp3", "opus", "aac", "flac", "wav", "pcm"],
+                    "default": "mp3"
+                  },
+                  "speed": {
+                    "type": "number",
+                    "minimum": 0.25,
+                    "maximum": 4.0,
+                    "default": 1.0
+                  }
+                },
+                "required": ["model", "input", "voice"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "audio/mpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/moderations": {
+      "post": {
+        "summary": "内容审核",
+        "description": "检查内容是否包含有害信息，兼容 OpenAI Moderations API",
+        "operationId": "createModeration",
+        "tags": ["Moderations"],
+        "security": [{"ApiKeyAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "input": {
+                    "oneOf": [
+                      {"type": "string"},
+                      {"type": "array", "items": {"type": "string"}}
+                    ],
+                    "description": "要审核的内容"
+                  },
+                  "model": {
+                    "type": "string",
+                    "default": "text-moderation-latest"
+                  }
+                },
+                "required": ["input"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/v1/files": {
+      "get": {
+        "summary": "列出文件",
+        "description": "列出当前用户的文件（未实现）",
+        "operationId": "listFiles",
+        "tags": ["Files"],
+        "security": [{"ApiKeyAuth": []}],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "post": {
+        "summary": "上传文件",
+        "description": "上传文件（未实现）",
+        "operationId": "createFile",
+        "tags": ["Files"],
+        "security": [{"ApiKeyAuth": []}],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/v1/files/{id}": {
+      "get": {
+        "summary": "获取文件信息",
+        "description": "（未实现）",
+        "operationId": "retrieveFile",
+        "tags": ["Files"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "delete": {
+        "summary": "删除文件",
+        "description": "（未实现）",
+        "operationId": "deleteFile",
+        "tags": ["Files"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/v1/files/{id}/content": {
+      "get": {
+        "summary": "获取文件内容",
+        "description": "（未实现）",
+        "operationId": "retrieveFileContent",
+        "tags": ["Files"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/v1/fine_tuning/jobs": {
+      "get": {
+        "summary": "列出微调任务",
+        "description": "（未实现）",
+        "operationId": "listFineTuningJobs",
+        "tags": ["Fine-tunes"],
+        "security": [{"ApiKeyAuth": []}],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "post": {
+        "summary": "创建微调任务",
+        "description": "（未实现）",
+        "operationId": "createFineTuningJob",
+        "tags": ["Fine-tunes"],
+        "security": [{"ApiKeyAuth": []}],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/v1/fine_tuning/jobs/{id}": {
+      "get": {
+        "summary": "获取微调任务",
+        "description": "（未实现）",
+        "operationId": "retrieveFineTuningJob",
+        "tags": ["Fine-tunes"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/v1/fine_tuning/jobs/{id}/cancel": {
+      "post": {
+        "summary": "取消微调任务",
+        "description": "（未实现）",
+        "operationId": "cancelFineTuningJob",
+        "tags": ["Fine-tunes"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/v1/fine_tuning/jobs/{id}/events": {
+      "get": {
+        "summary": "获取微调任务事件",
+        "description": "（未实现）",
+        "operationId": "listFineTuningEvents",
+        "tags": ["Fine-tunes"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/v1/engines/{model}/embeddings": {
+      "post": {
+        "summary": "创建 Embeddings (旧版)",
+        "description": "兼容旧版 OpenAI API",
+        "tags": ["Embeddings"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "model",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/EmbeddingRequest"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/v1/images/edits": {
+      "post": {
+        "summary": "编辑图片",
+        "description": "（未实现）",
+        "tags": ["图片生成"],
+        "security": [{"ApiKeyAuth": []}],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/v1/images/variations": {
+      "post": {
+        "summary": "生成图片变体",
+        "description": "（未实现）",
+        "tags": ["图片生成"],
+        "security": [{"ApiKeyAuth": []}],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/v1/edits": {
+      "post": {
+        "summary": "文本编辑",
+        "description": "（未实现）",
+        "tags": ["Completions"],
+        "security": [{"ApiKeyAuth": []}],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/v1/assistants": {
+      "get": {
+        "summary": "列出 Assistants",
+        "description": "（未实现）",
+        "tags": ["Assistants"],
+        "security": [{"ApiKeyAuth": []}],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "post": {
+        "summary": "创建 Assistant",
+        "description": "（未实现）",
+        "tags": ["Assistants"],
+        "security": [{"ApiKeyAuth": []}],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/v1/assistants/{id}": {
+      "get": {
+        "summary": "获取 Assistant",
+        "description": "（未实现）",
+        "tags": ["Assistants"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "post": {
+        "summary": "更新 Assistant",
+        "description": "（未实现）",
+        "tags": ["Assistants"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "delete": {
+        "summary": "删除 Assistant",
+        "description": "（未实现）",
+        "tags": ["Assistants"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/v1/assistants/{id}/files": {
+      "get": {
+        "summary": "列出 Assistant 文件",
+        "description": "（未实现）",
+        "tags": ["Assistants"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "post": {
+        "summary": "上传 Assistant 文件",
+        "description": "（未实现）",
+        "tags": ["Assistants"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/v1/assistants/{id}/files/{fileId}": {
+      "get": {
+        "summary": "获取 Assistant 文件",
+        "description": "（未实现）",
+        "tags": ["Assistants"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          },
+          {
+            "name": "fileId",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "delete": {
+        "summary": "删除 Assistant 文件",
+        "description": "（未实现）",
+        "tags": ["Assistants"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          },
+          {
+            "name": "fileId",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/v1/threads": {
+      "post": {
+        "summary": "创建 Thread",
+        "description": "（未实现）",
+        "tags": ["Assistants"],
+        "security": [{"ApiKeyAuth": []}],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/v1/threads/{id}": {
+      "get": {
+        "summary": "获取 Thread",
+        "description": "（未实现）",
+        "tags": ["Assistants"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "post": {
+        "summary": "更新 Thread",
+        "description": "（未实现）",
+        "tags": ["Assistants"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "delete": {
+        "summary": "删除 Thread",
+        "description": "（未实现）",
+        "tags": ["Assistants"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/v1/threads/{id}/messages": {
+      "get": {
+        "summary": "列出 Thread Messages",
+        "description": "（未实现）",
+        "tags": ["Assistants"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "post": {
+        "summary": "创建 Thread Message",
+        "description": "（未实现）",
+        "tags": ["Assistants"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/v1/threads/{id}/messages/{messageId}": {
+      "get": {
+        "summary": "获取 Thread Message",
+        "description": "（未实现）",
+        "tags": ["Assistants"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          },
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "post": {
+        "summary": "更新 Thread Message",
+        "description": "（未实现）",
+        "tags": ["Assistants"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          },
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/v1/threads/{id}/runs": {
+      "get": {
+        "summary": "列出 Thread Runs",
+        "description": "（未实现）",
+        "tags": ["Assistants"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "post": {
+        "summary": "创建 Thread Run",
+        "description": "（未实现）",
+        "tags": ["Assistants"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/v1/threads/{id}/runs/{runId}": {
+      "get": {
+        "summary": "获取 Thread Run",
+        "description": "（未实现）",
+        "tags": ["Assistants"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          },
+          {
+            "name": "runId",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "post": {
+        "summary": "更新 Thread Run",
+        "description": "（未实现）",
+        "tags": ["Assistants"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          },
+          {
+            "name": "runId",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/v1/threads/{id}/runs/{runId}/cancel": {
+      "post": {
+        "summary": "取消 Thread Run",
+        "description": "（未实现）",
+        "tags": ["Assistants"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          },
+          {
+            "name": "runId",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/v1/threads/{id}/runs/{runId}/submit_tool_outputs": {
+      "post": {
+        "summary": "提交 Tool Outputs",
+        "description": "（未实现）",
+        "tags": ["Assistants"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          },
+          {
+            "name": "runId",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/v1/threads/{id}/runs/{runId}/steps": {
+      "get": {
+        "summary": "列出 Run Steps",
+        "description": "（未实现）",
+        "tags": ["Assistants"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          },
+          {
+            "name": "runId",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/v1/threads/{id}/runs/{runId}/steps/{stepId}": {
+      "get": {
+        "summary": "获取 Run Step",
+        "description": "（未实现）",
+        "tags": ["Assistants"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          },
+          {
+            "name": "runId",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          },
+          {
+            "name": "stepId",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/v1/threads/{id}/messages/{messageId}/files": {
+      "get": {
+        "summary": "列出 Message Files",
+        "description": "（未实现）",
+        "tags": ["Assistants"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          },
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/v1/threads/{id}/messages/{messageId}/files/{fileId}": {
+      "get": {
+        "summary": "获取 Message File",
+        "description": "（未实现）",
+        "tags": ["Assistants"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          },
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          },
+          {
+            "name": "fileId",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/dashboard/billing/subscription": {
+      "get": {
+        "summary": "获取订阅信息",
+        "description": "获取当前令牌的订阅信息",
+        "tags": ["Billing"],
+        "security": [{"ApiKeyAuth": []}],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/SubscriptionResponse"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dashboard/billing/subscription": {
+      "get": {
+        "summary": "获取订阅信息 (v1)",
+        "tags": ["Billing"],
+        "security": [{"ApiKeyAuth": []}],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/dashboard/billing/usage": {
+      "get": {
+        "summary": "获取使用量",
+        "description": "获取当前令牌的使用量",
+        "tags": ["Billing"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "start_date",
+            "in": "query",
+            "required": true,
+            "schema": {"type": "string", "format": "date"},
+            "description": "开始日期 (YYYY-MM-DD)"
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "required": true,
+            "schema": {"type": "string", "format": "date"},
+            "description": "结束日期 (YYYY-MM-DD)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/v1/dashboard/billing/usage": {
+      "get": {
+        "summary": "获取使用量 (v1)",
+        "tags": ["Billing"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "start_date",
+            "in": "query",
+            "required": true,
+            "schema": {"type": "string", "format": "date"}
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "required": true,
+            "schema": {"type": "string", "format": "date"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/v1/oneapi/proxy/{channelid}/*target": {
+      "any": {
+        "summary": "代理请求",
+        "description": "代理请求到指定渠道",
+        "tags": ["获取模型列表"],
+        "security": [{"ApiKeyAuth": []}],
+        "parameters": [
+          {
+            "name": "channelid",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "integer"},
+            "description": "渠道 ID"
+          },
+          {
+            "name": "target",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"},
+            "description": "目标路径"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Model": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string", "description": "模型 ID"},
+          "object": {"type": "string", "example": "model"},
+          "created": {"type": "integer", "description": "创建时间戳"},
+          "owned_by": {"type": "string", "description": "模型所有者"}
+        }
+      },
+      "ChatCompletionRequest": {
+        "type": "object",
+        "properties": {
+          "model": {
+            "type": "string",
+            "description": "模型 ID",
+            "required": true
+          },
+          "messages": {
+            "type": "array",
+            "items": {"$ref": "#/components/schemas/ChatMessage"},
+            "description": "消息列表",
+            "required": true
+          },
+          "temperature": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 2,
+            "default": 1,
+            "description": "采样温度"
+          },
+          "top_p": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 1,
+            "description": "核采样参数"
+          },
+          "n": {
+            "type": "integer",
+            "default": 1,
+            "description": "生成数量"
+          },
+          "stream": {
+            "type": "boolean",
+            "default": false,
+            "description": "是否流式输出"
+          },
+          "stop": {
+            "oneOf": [
+              {"type": "string"},
+              {"type": "array", "items": {"type": "string"}}
+            ],
+            "description": "停止序列"
+          },
+          "max_tokens": {
+            "type": "integer",
+            "description": "最大生成 token 数"
+          },
+          "presence_penalty": {
+            "type": "number",
+            "minimum": -2,
+            "maximum": 2,
+            "default": 0
+          },
+          "frequency_penalty": {
+            "type": "number",
+            "minimum": -2,
+            "maximum": 2,
+            "default": 0
+          },
+          "logit_bias": {
+            "type": "object",
+            "additionalProperties": {"type": "number"}
+          },
+          "user": {
+            "type": "string",
+            "description": "用户标识"
+          },
+          "functions": {
+            "type": "array",
+            "items": {"$ref": "#/components/schemas/Function"}
+          },
+          "function_call": {
+            "oneOf": [
+              {"type": "string", "enum": ["none", "auto"]},
+              {"type": "object", "properties": {"name": {"type": "string"}}}
+            ]
+          },
+          "tools": {
+            "type": "array",
+            "items": {"$ref": "#/components/schemas/Tool"}
+          },
+          "tool_choice": {
+            "oneOf": [
+              {"type": "string", "enum": ["none", "auto"]},
+              {"type": "object"}
+            ]
+          }
+        },
+        "required": ["model", "messages"]
+      },
+      "ChatMessage": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": ["system", "user", "assistant", "function", "tool"],
+            "description": "消息角色"
+          },
+          "content": {
+            "oneOf": [
+              {"type": "string"},
+              {"type": "array", "items": {"$ref": "#/components/schemas/ContentPart"}}
+            ],
+            "description": "消息内容"
+          },
+          "name": {
+            "type": "string",
+            "description": "发送者名称"
+          },
+          "function_call": {
+            "type": "object",
+            "properties": {
+              "name": {"type": "string"},
+              "arguments": {"type": "string"}
+            }
+          },
+          "tool_calls": {
+            "type": "array",
+            "items": {"$ref": "#/components/schemas/ToolCall"}
+          },
+          "tool_call_id": {
+            "type": "string"
+          }
+        },
+        "required": ["role"]
+      },
+      "ContentPart": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["text", "image_url"]
+          },
+          "text": {
+            "type": "string"
+          },
+          "image_url": {
+            "type": "object",
+            "properties": {
+              "url": {"type": "string"},
+              "detail": {
+                "type": "string",
+                "enum": ["auto", "low", "high"]
+              }
+            }
+          }
+        }
+      },
+      "Function": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string"},
+          "description": {"type": "string"},
+          "parameters": {"type": "object"}
+        },
+        "required": ["name"]
+      },
+      "Tool": {
+        "type": "object",
+        "properties": {
+          "type": {"type": "string", "enum": ["function"]},
+          "function": {"$ref": "#/components/schemas/Function"}
+        }
+      },
+      "ToolCall": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "type": {"type": "string"},
+          "function": {
+            "type": "object",
+            "properties": {
+              "name": {"type": "string"},
+              "arguments": {"type": "string"}
+            }
+          }
+        }
+      },
+      "ChatCompletionResponse": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "object": {"type": "string", "example": "chat.completion"},
+          "created": {"type": "integer"},
+          "model": {"type": "string"},
+          "choices": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "index": {"type": "integer"},
+                "message": {"$ref": "#/components/schemas/ChatMessage"},
+                "finish_reason": {
+                  "type": "string",
+                  "enum": ["stop", "length", "function_call", "tool_calls"]
+                }
+              }
+            }
+          },
+          "usage": {"$ref": "#/components/schemas/Usage"}
+        }
+      },
+      "CompletionRequest": {
+        "type": "object",
+        "properties": {
+          "model": {"type": "string"},
+          "prompt": {
+            "oneOf": [
+              {"type": "string"},
+              {"type": "array", "items": {"type": "string"}}
+            ]
+          },
+          "suffix": {"type": "string"},
+          "max_tokens": {"type": "integer", "default": 16},
+          "temperature": {"type": "number", "default": 1},
+          "top_p": {"type": "number", "default": 1},
+          "n": {"type": "integer", "default": 1},
+          "stream": {"type": "boolean", "default": false},
+          "logprobs": {"type": "integer"},
+          "echo": {"type": "boolean", "default": false},
+          "stop": {
+            "oneOf": [
+              {"type": "string"},
+              {"type": "array", "items": {"type": "string"}}
+            ]
+          },
+          "presence_penalty": {"type": "number", "default": 0},
+          "frequency_penalty": {"type": "number", "default": 0},
+          "best_of": {"type": "integer", "default": 1},
+          "logit_bias": {"type": "object"},
+          "user": {"type": "string"}
+        },
+        "required": ["model", "prompt"]
+      },
+      "CompletionResponse": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "object": {"type": "string", "example": "text_completion"},
+          "created": {"type": "integer"},
+          "model": {"type": "string"},
+          "choices": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "text": {"type": "string"},
+                "index": {"type": "integer"},
+                "logprobs": {"type": "object"},
+                "finish_reason": {"type": "string"}
+              }
+            }
+          },
+          "usage": {"$ref": "#/components/schemas/Usage"}
+        }
+      },
+      "ImageRequest": {
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "description": "图片描述"
+          },
+          "model": {
+            "type": "string",
+            "description": "模型 ID"
+          },
+          "n": {
+            "type": "integer",
+            "default": 1,
+            "description": "生成数量"
+          },
+          "size": {
+            "type": "string",
+            "enum": ["256x256", "512x512", "1024x1024", "1792x1024", "1024x1792"],
+            "default": "1024x1024"
+          },
+          "response_format": {
+            "type": "string",
+            "enum": ["url", "b64_json"],
+            "default": "url"
+          },
+          "quality": {
+            "type": "string",
+            "enum": ["standard", "hd"],
+            "default": "standard"
+          },
+          "style": {
+            "type": "string",
+            "enum": ["vivid", "natural"]
+          },
+          "user": {"type": "string"}
+        },
+        "required": ["prompt"]
+      },
+      "ImageResponse": {
+        "type": "object",
+        "properties": {
+          "created": {"type": "integer"},
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "url": {"type": "string"},
+                "b64_json": {"type": "string"},
+                "revised_prompt": {"type": "string"}
+              }
+            }
+          }
+        }
+      },
+      "EmbeddingRequest": {
+        "type": "object",
+        "properties": {
+          "model": {"type": "string"},
+          "input": {
+            "oneOf": [
+              {"type": "string"},
+              {"type": "array", "items": {"type": "string"}},
+              {"type": "array", "items": {"type": "integer"}},
+              {"type": "array", "items": {"type": "array", "items": {"type": "integer"}}}
+            ]
+          },
+          "encoding_format": {
+            "type": "string",
+            "enum": ["float", "base64"]
+          },
+          "user": {"type": "string"}
+        },
+        "required": ["model", "input"]
+      },
+      "EmbeddingResponse": {
+        "type": "object",
+        "properties": {
+          "object": {"type": "string", "example": "list"},
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "object": {"type": "string", "example": "embedding"},
+                "embedding": {
+                  "type": "array",
+                  "items": {"type": "number"}
+                },
+                "index": {"type": "integer"}
+              }
+            }
+          },
+          "model": {"type": "string"},
+          "usage": {"$ref": "#/components/schemas/Usage"}
+        }
+      },
+      "Usage": {
+        "type": "object",
+        "properties": {
+          "prompt_tokens": {"type": "integer"},
+          "completion_tokens": {"type": "integer"},
+          "total_tokens": {"type": "integer"}
+        }
+      },
+      "SubscriptionResponse": {
+        "type": "object",
+        "properties": {
+          "object": {"type": "string", "example": "credit_summary"},
+          "total_granted": {"type": "integer", "description": "总额度"},
+          "total_used": {"type": "integer", "description": "已使用额度"},
+          "total_available": {"type": "integer", "description": "可用额度"},
+          "expires_at": {"type": "integer", "description": "过期时间戳"}
+        }
+      }
+    },
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "API Key 认证，格式: Bearer sk-xxxx"
+      }
+    }
+  }
+}

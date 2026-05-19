@@ -1,0 +1,1740 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "One API 后台管理接口",
+    "description": "One API 管理后台 REST API 文档",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {"name": "系统"},
+    {"name": "用户认证"},
+    {"name": "OAuth"},
+    {"name": "用户管理"},
+    {"name": "充值"},
+    {"name": "渠道管理"},
+    {"name": "令牌管理"},
+    {"name": "兑换码"},
+    {"name": "日志"},
+    {"name": "分组"},
+    {"name": "系统设置"}
+  ],
+  "paths": {
+    "/api/status": {
+      "get": {
+        "summary": "获取系统状态",
+        "description": "🔓 无需鉴权",
+        "tags": ["系统"],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {"type": "boolean"},
+                    "message": {"type": "string"},
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "version": {"type": "string"},
+                        "start_time": {"type": "integer"},
+                        "email_verification": {"type": "boolean"},
+                        "github_oauth": {"type": "boolean"},
+                        "github_client_id": {"type": "string"},
+                        "system_name": {"type": "string"},
+                        "logo": {"type": "string"},
+                        "footer_html": {"type": "string"},
+                        "wechat_qrcode": {"type": "string"},
+                        "wechat_login": {"type": "boolean"},
+                        "server_address": {"type": "string"},
+                        "turnstile_check": {"type": "boolean"},
+                        "turnstile_site_key": {"type": "string"},
+                        "top_up_link": {"type": "string"},
+                        "chat_link": {"type": "string"},
+                        "quota_per_unit": {"type": "number"},
+                        "display_in_currency": {"type": "boolean"},
+                        "oidc": {"type": "boolean"},
+                        "oidc_client_id": {"type": "string"}
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/notice": {
+      "get": {
+        "summary": "获取公告",
+        "description": "🔓 无需鉴权",
+        "tags": ["系统"],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {"type": "boolean"},
+                    "message": {"type": "string"},
+                    "data": {"type": "string"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/about": {
+      "get": {
+        "summary": "获取关于页面内容",
+        "description": "🔓 无需鉴权",
+        "tags": ["系统"],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/home_page_content": {
+      "get": {
+        "summary": "获取首页内容",
+        "description": "🔓 无需鉴权",
+        "tags": ["系统"],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/models": {
+      "get": {
+        "summary": "获取可用模型列表",
+        "description": "🔒 需要用户认证",
+        "tags": ["系统"],
+        "security": [{"UserAuth": []}],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/verification": {
+      "get": {
+        "summary": "发送邮箱验证码",
+        "description": "🔓 有频率限制",
+        "tags": ["用户认证"],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "required": true,
+            "schema": {"type": "string", "format": "email"},
+            "description": "邮箱地址"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/reset_password": {
+      "get": {
+        "summary": "发送密码重置邮件",
+        "description": "🔓 有频率限制",
+        "tags": ["用户认证"],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "required": true,
+            "schema": {"type": "string", "format": "email"},
+            "description": "邮箱地址"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/user/reset": {
+      "post": {
+        "summary": "重置密码",
+        "description": "🔓 有频率限制",
+        "tags": ["用户认证"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {"type": "string", "format": "email"},
+                  "token": {"type": "string"}
+                },
+                "required": ["email", "token"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {"type": "boolean"},
+                    "message": {"type": "string"},
+                    "data": {"type": "string", "description": "新密码"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/register": {
+      "post": {
+        "summary": "用户注册",
+        "description": "🔓 有频率限制",
+        "tags": ["用户认证"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {"type": "string", "maxLength": 12},
+                  "password": {"type": "string", "minLength": 8, "maxLength": 20},
+                  "email": {"type": "string", "format": "email"},
+                  "verification_code": {"type": "string"}
+                },
+                "required": ["username", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/user/login": {
+      "post": {
+        "summary": "用户登录",
+        "description": "🔓 有频率限制",
+        "tags": ["用户认证"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {"type": "string"},
+                  "password": {"type": "string"}
+                },
+                "required": ["username", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {"type": "boolean"},
+                    "message": {"type": "string"},
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {"type": "integer"},
+                        "username": {"type": "string"},
+                        "display_name": {"type": "string"},
+                        "role": {"type": "integer"},
+                        "status": {"type": "integer"}
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/logout": {
+      "get": {
+        "summary": "用户登出",
+        "tags": ["用户认证"],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/oauth/github": {
+      "get": {
+        "summary": "GitHub OAuth 登录",
+        "description": "🔓 有频率限制",
+        "tags": ["OAuth"],
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "required": true,
+            "schema": {"type": "string"},
+            "description": "OAuth 授权码"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/oauth/oidc": {
+      "get": {
+        "summary": "OIDC 登录",
+        "description": "🔓 有频率限制",
+        "tags": ["OAuth"],
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/oauth/lark": {
+      "get": {
+        "summary": "飞书 OAuth 登录",
+        "description": "🔓 有频率限制",
+        "tags": ["OAuth"],
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/oauth/wechat": {
+      "get": {
+        "summary": "微信登录",
+        "description": "🔓 有频率限制",
+        "tags": ["OAuth"],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/oauth/wechat/bind": {
+      "get": {
+        "summary": "绑定微信",
+        "description": "🔒 需要用户认证",
+        "tags": ["OAuth"],
+        "security": [{"UserAuth": []}],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/oauth/email/bind": {
+      "get": {
+        "summary": "绑定邮箱",
+        "description": "🔒 需要用户认证",
+        "tags": ["OAuth"],
+        "security": [{"UserAuth": []}],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "required": true,
+            "schema": {"type": "string", "format": "email"}
+          },
+          {
+            "name": "code",
+            "in": "query",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/user/self": {
+      "get": {
+        "summary": "获取当前用户信息",
+        "description": "🔒 需要用户认证",
+        "tags": ["用户管理"],
+        "security": [{"UserAuth": []}],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {"type": "boolean"},
+                    "message": {"type": "string"},
+                    "data": {"$ref": "#/components/schemas/User"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "更新当前用户信息",
+        "description": "🔒 需要用户认证",
+        "tags": ["用户管理"],
+        "security": [{"UserAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "display_name": {"type": "string", "maxLength": 20},
+                  "email": {"type": "string", "format": "email"},
+                  "password": {"type": "string", "minLength": 8, "maxLength": 20}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "delete": {
+        "summary": "注销当前用户",
+        "description": "🔒 需要用户认证",
+        "tags": ["用户管理"],
+        "security": [{"UserAuth": []}],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/user/dashboard": {
+      "get": {
+        "summary": "获取用户仪表盘数据",
+        "description": "🔒 需要用户认证",
+        "tags": ["用户管理"],
+        "security": [{"UserAuth": []}],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/user/token": {
+      "get": {
+        "summary": "生成访问令牌",
+        "description": "🔒 需要用户认证",
+        "tags": ["用户管理"],
+        "security": [{"UserAuth": []}],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/user/aff": {
+      "get": {
+        "summary": "获取邀请码",
+        "description": "🔒 需要用户认证",
+        "tags": ["用户管理"],
+        "security": [{"UserAuth": []}],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/user/available_models": {
+      "get": {
+        "summary": "获取用户可用模型列表",
+        "description": "🔒 需要用户认证",
+        "tags": ["用户管理"],
+        "security": [{"UserAuth": []}],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/user/": {
+      "get": {
+        "summary": "获取所有用户",
+        "description": "🔒 需要管理员权限",
+        "tags": ["用户管理"],
+        "security": [{"AdminAuth": []}],
+        "parameters": [
+          {
+            "name": "p",
+            "in": "query",
+            "schema": {"type": "integer", "default": 0},
+            "description": "页码"
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "schema": {"type": "string", "enum": ["quota", "used_quota", "request_count"]},
+            "description": "排序方式"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {"type": "boolean"},
+                    "message": {"type": "string"},
+                    "data": {
+                      "type": "array",
+                      "items": {"$ref": "#/components/schemas/User"}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "更新用户",
+        "description": "🔒 需要管理员权限",
+        "tags": ["用户管理"],
+        "security": [{"AdminAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/User"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "post": {
+        "summary": "创建用户",
+        "description": "🔒 需要管理员权限",
+        "tags": ["用户管理"],
+        "security": [{"AdminAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {"type": "string"},
+                  "password": {"type": "string"},
+                  "display_name": {"type": "string"},
+                  "role": {"type": "integer", "enum": [0, 1, 10, 100]},
+                  "email": {"type": "string", "format": "email"}
+                },
+                "required": ["username", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/user/search": {
+      "get": {
+        "summary": "搜索用户",
+        "description": "🔒 需要管理员权限",
+        "tags": ["用户管理"],
+        "security": [{"AdminAuth": []}],
+        "parameters": [
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": true,
+            "schema": {"type": "string"},
+            "description": "搜索关键词"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/user/{id}": {
+      "get": {
+        "summary": "获取指定用户",
+        "description": "🔒 需要管理员权限",
+        "tags": ["用户管理"],
+        "security": [{"AdminAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "integer"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "delete": {
+        "summary": "删除用户",
+        "description": "🔒 需要管理员权限",
+        "tags": ["用户管理"],
+        "security": [{"AdminAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "integer"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/user/manage": {
+      "post": {
+        "summary": "管理用户",
+        "description": "🔒 需要管理员权限",
+        "tags": ["用户管理"],
+        "security": [{"AdminAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {"type": "integer"},
+                  "action": {"type": "string", "enum": ["enable", "disable", "set_role", "set_quota"]}
+                },
+                "required": ["id", "action"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/topup": {
+      "post": {
+        "summary": "管理员充值",
+        "description": "🔒 需要管理员权限",
+        "tags": ["充值"],
+        "security": [{"AdminAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "user_id": {"type": "integer"},
+                  "quota": {"type": "integer", "description": "充值额度"},
+                  "remark": {"type": "string"}
+                },
+                "required": ["user_id", "quota"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/user/topup": {
+      "post": {
+        "summary": "用户自助充值",
+        "description": "🔒 需要用户认证",
+        "tags": ["充值"],
+        "security": [{"UserAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "key": {"type": "string", "description": "兑换码"}
+                },
+                "required": ["key"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/channel/": {
+      "get": {
+        "summary": "获取所有渠道",
+        "description": "🔒 需要管理员权限",
+        "tags": ["渠道管理"],
+        "security": [{"AdminAuth": []}],
+        "parameters": [
+          {
+            "name": "p",
+            "in": "query",
+            "schema": {"type": "integer", "default": 0},
+            "description": "页码"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {"type": "boolean"},
+                    "message": {"type": "string"},
+                    "data": {
+                      "type": "array",
+                      "items": {"$ref": "#/components/schemas/Channel"}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "创建渠道",
+        "description": "🔒 需要管理员权限",
+        "tags": ["渠道管理"],
+        "security": [{"AdminAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/ChannelCreate"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "put": {
+        "summary": "更新渠道",
+        "description": "🔒 需要管理员权限",
+        "tags": ["渠道管理"],
+        "security": [{"AdminAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/Channel"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/channel/search": {
+      "get": {
+        "summary": "搜索渠道",
+        "description": "🔒 需要管理员权限",
+        "tags": ["渠道管理"],
+        "security": [{"AdminAuth": []}],
+        "parameters": [
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/channel/models": {
+      "get": {
+        "summary": "获取所有渠道的模型列表",
+        "description": "🔒 需要管理员权限",
+        "tags": ["渠道管理"],
+        "security": [{"AdminAuth": []}],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/channel/{id}": {
+      "get": {
+        "summary": "获取指定渠道",
+        "description": "🔒 需要管理员权限",
+        "tags": ["渠道管理"],
+        "security": [{"AdminAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "integer"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "delete": {
+        "summary": "删除渠道",
+        "description": "🔒 需要管理员权限",
+        "tags": ["渠道管理"],
+        "security": [{"AdminAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "integer"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/channel/test": {
+      "get": {
+        "summary": "测试所有渠道",
+        "description": "🔒 需要管理员权限",
+        "tags": ["渠道管理"],
+        "security": [{"AdminAuth": []}],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/channel/test/{id}": {
+      "get": {
+        "summary": "测试指定渠道",
+        "description": "🔒 需要管理员权限",
+        "tags": ["渠道管理"],
+        "security": [{"AdminAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "integer"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/channel/update_balance": {
+      "get": {
+        "summary": "更新所有渠道余额",
+        "description": "🔒 需要管理员权限",
+        "tags": ["渠道管理"],
+        "security": [{"AdminAuth": []}],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/channel/update_balance/{id}": {
+      "get": {
+        "summary": "更新指定渠道余额",
+        "description": "🔒 需要管理员权限",
+        "tags": ["渠道管理"],
+        "security": [{"AdminAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "integer"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/channel/disabled": {
+      "delete": {
+        "summary": "删除所有禁用的渠道",
+        "description": "🔒 需要管理员权限",
+        "tags": ["渠道管理"],
+        "security": [{"AdminAuth": []}],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/token/": {
+      "get": {
+        "summary": "获取当前用户的所有令牌",
+        "description": "🔒 需要用户认证",
+        "tags": ["令牌管理"],
+        "security": [{"UserAuth": []}],
+        "parameters": [
+          {
+            "name": "p",
+            "in": "query",
+            "schema": {"type": "integer", "default": 0},
+            "description": "页码"
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "schema": {"type": "string", "enum": ["remain_quota", "used_quota"]},
+            "description": "排序方式"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {"type": "boolean"},
+                    "message": {"type": "string"},
+                    "data": {
+                      "type": "array",
+                      "items": {"$ref": "#/components/schemas/Token"}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "创建令牌",
+        "description": "🔒 需要用户认证",
+        "tags": ["令牌管理"],
+        "security": [{"UserAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {"type": "string"},
+                  "expired_time": {"type": "integer", "description": "过期时间戳，-1表示永不过期"},
+                  "remain_quota": {"type": "integer"},
+                  "unlimited_quota": {"type": "boolean"},
+                  "models": {"type": "string", "description": "允许的模型，JSON数组"},
+                  "subnet": {"type": "string", "description": "允许的子网"}
+                },
+                "required": ["name"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/token/search": {
+      "get": {
+        "summary": "搜索令牌",
+        "description": "🔒 需要用户认证",
+        "tags": ["令牌管理"],
+        "security": [{"UserAuth": []}],
+        "parameters": [
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/token/{id}": {
+      "get": {
+        "summary": "获取指定令牌",
+        "description": "🔒 需要用户认证",
+        "tags": ["令牌管理"],
+        "security": [{"UserAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "integer"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "delete": {
+        "summary": "删除令牌",
+        "description": "🔒 需要用户认证",
+        "tags": ["令牌管理"],
+        "security": [{"UserAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "integer"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/token/": {
+      "put": {
+        "summary": "更新令牌",
+        "description": "🔒 需要用户认证",
+        "tags": ["令牌管理"],
+        "security": [{"UserAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/Token"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/redemption/": {
+      "get": {
+        "summary": "获取所有兑换码",
+        "description": "🔒 需要管理员权限",
+        "tags": ["兑换码"],
+        "security": [{"AdminAuth": []}],
+        "parameters": [
+          {
+            "name": "p",
+            "in": "query",
+            "schema": {"type": "integer", "default": 0},
+            "description": "页码"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {"type": "boolean"},
+                    "message": {"type": "string"},
+                    "data": {
+                      "type": "array",
+                      "items": {"$ref": "#/components/schemas/Redemption"}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "创建兑换码",
+        "description": "🔒 需要管理员权限",
+        "tags": ["兑换码"],
+        "security": [{"AdminAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {"type": "string"},
+                  "quota": {"type": "integer", "description": "兑换码额度"},
+                  "count": {"type": "integer", "description": "生成数量", "default": 1}
+                },
+                "required": ["quota"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/redemption/search": {
+      "get": {
+        "summary": "搜索兑换码",
+        "description": "🔒 需要管理员权限",
+        "tags": ["兑换码"],
+        "security": [{"AdminAuth": []}],
+        "parameters": [
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/redemption/{id}": {
+      "get": {
+        "summary": "获取指定兑换码",
+        "description": "🔒 需要管理员权限",
+        "tags": ["兑换码"],
+        "security": [{"AdminAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "integer"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "put": {
+        "summary": "更新兑换码",
+        "description": "🔒 需要管理员权限",
+        "tags": ["兑换码"],
+        "security": [{"AdminAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "integer"}
+          },
+          {
+            "name": "status_only",
+            "in": "query",
+            "schema": {"type": "boolean"},
+            "description": "是否只更新状态"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/Redemption"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "delete": {
+        "summary": "删除兑换码",
+        "description": "🔒 需要管理员权限",
+        "tags": ["兑换码"],
+        "security": [{"AdminAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "integer"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/log/": {
+      "get": {
+        "summary": "获取所有日志",
+        "description": "🔒 需要管理员权限",
+        "tags": ["日志"],
+        "security": [{"AdminAuth": []}],
+        "parameters": [
+          {
+            "name": "p",
+            "in": "query",
+            "schema": {"type": "integer", "default": 0},
+            "description": "页码"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "schema": {"type": "integer"},
+            "description": "日志类型"
+          },
+          {
+            "name": "start_timestamp",
+            "in": "query",
+            "schema": {"type": "integer"},
+            "description": "开始时间戳"
+          },
+          {
+            "name": "end_timestamp",
+            "in": "query",
+            "schema": {"type": "integer"},
+            "description": "结束时间戳"
+          },
+          {
+            "name": "username",
+            "in": "query",
+            "schema": {"type": "string"}
+          },
+          {
+            "name": "token_name",
+            "in": "query",
+            "schema": {"type": "string"}
+          },
+          {
+            "name": "model_name",
+            "in": "query",
+            "schema": {"type": "string"}
+          },
+          {
+            "name": "channel",
+            "in": "query",
+            "schema": {"type": "integer"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "delete": {
+        "summary": "删除历史日志",
+        "description": "🔒 需要管理员权限",
+        "tags": ["日志"],
+        "security": [{"AdminAuth": []}],
+        "parameters": [
+          {
+            "name": "target_timestamp",
+            "in": "query",
+            "required": true,
+            "schema": {"type": "integer"},
+            "description": "目标时间戳，删除此时间之前的日志"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/log/stat": {
+      "get": {
+        "summary": "获取日志统计",
+        "description": "🔒 需要管理员权限",
+        "tags": ["日志"],
+        "security": [{"AdminAuth": []}],
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "schema": {"type": "integer"}
+          },
+          {
+            "name": "start_timestamp",
+            "in": "query",
+            "schema": {"type": "integer"}
+          },
+          {
+            "name": "end_timestamp",
+            "in": "query",
+            "schema": {"type": "integer"}
+          },
+          {
+            "name": "token_name",
+            "in": "query",
+            "schema": {"type": "string"}
+          },
+          {
+            "name": "username",
+            "in": "query",
+            "schema": {"type": "string"}
+          },
+          {
+            "name": "model_name",
+            "in": "query",
+            "schema": {"type": "string"}
+          },
+          {
+            "name": "channel",
+            "in": "query",
+            "schema": {"type": "integer"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {"type": "boolean"},
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "quota": {"type": "integer"}
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/log/self/stat": {
+      "get": {
+        "summary": "获取当前用户日志统计",
+        "description": "🔒 需要用户认证",
+        "tags": ["日志"],
+        "security": [{"UserAuth": []}],
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "schema": {"type": "integer"}
+          },
+          {
+            "name": "start_timestamp",
+            "in": "query",
+            "schema": {"type": "integer"}
+          },
+          {
+            "name": "end_timestamp",
+            "in": "query",
+            "schema": {"type": "integer"}
+          },
+          {
+            "name": "token_name",
+            "in": "query",
+            "schema": {"type": "string"}
+          },
+          {
+            "name": "model_name",
+            "in": "query",
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/log/search": {
+      "get": {
+        "summary": "搜索所有日志",
+        "description": "🔒 需要管理员权限",
+        "tags": ["日志"],
+        "security": [{"AdminAuth": []}],
+        "parameters": [
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/log/self": {
+      "get": {
+        "summary": "获取当前用户日志",
+        "description": "🔒 需要用户认证",
+        "tags": ["日志"],
+        "security": [{"UserAuth": []}],
+        "parameters": [
+          {
+            "name": "p",
+            "in": "query",
+            "schema": {"type": "integer", "default": 0}
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "schema": {"type": "integer"}
+          },
+          {
+            "name": "start_timestamp",
+            "in": "query",
+            "schema": {"type": "integer"}
+          },
+          {
+            "name": "end_timestamp",
+            "in": "query",
+            "schema": {"type": "integer"}
+          },
+          {
+            "name": "token_name",
+            "in": "query",
+            "schema": {"type": "string"}
+          },
+          {
+            "name": "model_name",
+            "in": "query",
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/log/self/search": {
+      "get": {
+        "summary": "搜索当前用户日志",
+        "description": "🔒 需要用户认证",
+        "tags": ["日志"],
+        "security": [{"UserAuth": []}],
+        "parameters": [
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/group/": {
+      "get": {
+        "summary": "获取所有分组",
+        "description": "🔒 需要管理员权限",
+        "tags": ["分组"],
+        "security": [{"AdminAuth": []}],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/option/": {
+      "get": {
+        "summary": "获取所有系统设置",
+        "description": "🔒 需要 Root 权限",
+        "tags": ["系统设置"],
+        "security": [{"RootAuth": []}],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "put": {
+        "summary": "更新系统设置",
+        "description": "🔒 需要 Root 权限",
+        "tags": ["系统设置"],
+        "security": [{"RootAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {"type": "string"}
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "integer"},
+          "username": {"type": "string"},
+          "display_name": {"type": "string"},
+          "role": {"type": "integer", "description": "0=游客, 1=普通用户, 10=管理员, 100=Root"},
+          "status": {"type": "integer", "description": "1=启用, 2=禁用, 3=删除"},
+          "email": {"type": "string", "format": "email"},
+          "github_id": {"type": "string"},
+          "wechat_id": {"type": "string"},
+          "lark_id": {"type": "string"},
+          "oidc_id": {"type": "string"},
+          "access_token": {"type": "string"},
+          "quota": {"type": "integer", "description": "用户额度"},
+          "used_quota": {"type": "integer", "description": "已使用额度"},
+          "request_count": {"type": "integer"},
+          "group": {"type": "string"},
+          "aff_code": {"type": "string", "description": "邀请码"},
+          "inviter_id": {"type": "integer"}
+        }
+      },
+      "Channel": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "integer"},
+          "type": {"type": "integer", "description": "渠道类型"},
+          "key": {"type": "string", "description": "API Key"},
+          "status": {"type": "integer", "description": "0=未知, 1=启用, 2=手动禁用, 3=自动禁用"},
+          "name": {"type": "string"},
+          "weight": {"type": "integer"},
+          "created_time": {"type": "integer"},
+          "test_time": {"type": "integer"},
+          "response_time": {"type": "integer", "description": "响应时间(毫秒)"},
+          "base_url": {"type": "string"},
+          "balance": {"type": "number", "description": "余额(USD)"},
+          "balance_updated_time": {"type": "integer"},
+          "models": {"type": "string", "description": "支持的模型列表"},
+          "group": {"type": "string"},
+          "used_quota": {"type": "integer"},
+          "model_mapping": {"type": "string", "description": "模型映射"},
+          "priority": {"type": "integer"},
+          "config": {"type": "string", "description": "渠道配置"},
+          "system_prompt": {"type": "string"}
+        }
+      },
+      "ChannelCreate": {
+        "type": "object",
+        "properties": {
+          "type": {"type": "integer"},
+          "key": {"type": "string"},
+          "name": {"type": "string"},
+          "base_url": {"type": "string"},
+          "models": {"type": "string"},
+          "group": {"type": "string"},
+          "model_mapping": {"type": "string"},
+          "priority": {"type": "integer"},
+          "config": {"type": "string"}
+        },
+        "required": ["type", "key", "name", "models"]
+      },
+      "Token": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "integer"},
+          "user_id": {"type": "integer"},
+          "key": {"type": "string", "description": "令牌 Key"},
+          "status": {"type": "integer", "description": "1=启用, 2=禁用, 3=过期, 4=用尽"},
+          "name": {"type": "string"},
+          "created_time": {"type": "integer"},
+          "accessed_time": {"type": "integer"},
+          "expired_time": {"type": "integer", "description": "过期时间戳，-1表示永不过期"},
+          "remain_quota": {"type": "integer"},
+          "unlimited_quota": {"type": "boolean"},
+          "used_quota": {"type": "integer"},
+          "models": {"type": "string", "description": "允许的模型"},
+          "subnet": {"type": "string", "description": "允许的子网"}
+        }
+      },
+      "Redemption": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "integer"},
+          "user_id": {"type": "integer"},
+          "key": {"type": "string", "description": "兑换码"},
+          "status": {"type": "integer", "description": "1=未使用, 2=已使用, 3=已禁用"},
+          "name": {"type": "string"},
+          "created_time": {"type": "integer"},
+          "used_time": {"type": "integer"},
+          "quota": {"type": "integer", "description": "兑换额度"}
+        }
+      }
+    },
+    "securitySchemes": {
+      "UserAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "用户认证令牌，格式: Bearer <session_token>"
+      },
+      "AdminAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "管理员认证令牌，格式: Bearer <session_token>"
+      },
+      "RootAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Root 用户认证令牌，格式: Bearer <session_token>"
+      }
+    }
+  }
+}

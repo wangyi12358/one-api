@@ -26,6 +26,26 @@ import (
 //go:embed web/build/*
 var buildFS embed.FS
 
+// @title One API
+// @version 1.0
+// @description One API 后台管理接口文档
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:3000
+// @BasePath /
+// @schemes http https
+
+// @securityDefinitions.apikey UserAuth
+// @in header
+// @name Authorization
+
 func main() {
 	common.Init()
 	logger.SetupLogger()

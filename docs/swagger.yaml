@@ -1,0 +1,1678 @@
+basePath: /
+definitions:
+  controller.LoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  controller.PasswordResetRequest:
+    properties:
+      email:
+        type: string
+      token:
+        type: string
+    type: object
+  controller.adminTopUpRequest:
+    properties:
+      quota:
+        type: integer
+      remark:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  controller.topUpRequest:
+    properties:
+      key:
+        type: string
+    type: object
+  model.Channel:
+    properties:
+      balance:
+        description: in USD
+        type: number
+      balance_updated_time:
+        type: integer
+      base_url:
+        type: string
+      config:
+        type: string
+      created_time:
+        type: integer
+      group:
+        type: string
+      id:
+        type: integer
+      key:
+        type: string
+      model_mapping:
+        type: string
+      models:
+        type: string
+      name:
+        type: string
+      other:
+        description: 'DEPRECATED: please save config to field Config'
+        type: string
+      priority:
+        type: integer
+      response_time:
+        description: in milliseconds
+        type: integer
+      status:
+        type: integer
+      system_prompt:
+        type: string
+      test_time:
+        type: integer
+      type:
+        type: integer
+      used_quota:
+        type: integer
+      weight:
+        type: integer
+    type: object
+  model.Option:
+    properties:
+      key:
+        type: string
+      value:
+        type: string
+    type: object
+  model.Redemption:
+    properties:
+      count:
+        description: only for api request
+        type: integer
+      created_time:
+        type: integer
+      id:
+        type: integer
+      key:
+        type: string
+      name:
+        type: string
+      quota:
+        type: integer
+      redeemed_time:
+        type: integer
+      status:
+        type: integer
+      user_id:
+        type: integer
+    type: object
+  model.Token:
+    properties:
+      accessed_time:
+        type: integer
+      created_time:
+        type: integer
+      expired_time:
+        description: -1 means never expired
+        type: integer
+      id:
+        type: integer
+      key:
+        type: string
+      models:
+        description: allowed models
+        type: string
+      name:
+        type: string
+      remain_quota:
+        type: integer
+      status:
+        type: integer
+      subnet:
+        description: allowed subnet
+        type: string
+      unlimited_quota:
+        type: boolean
+      used_quota:
+        description: used quota
+        type: integer
+      user_id:
+        type: integer
+    type: object
+  model.User:
+    properties:
+      access_token:
+        description: this token is for system management
+        type: string
+      aff_code:
+        type: string
+      display_name:
+        maxLength: 20
+        type: string
+      email:
+        maxLength: 50
+        type: string
+      github_id:
+        type: string
+      group:
+        type: string
+      id:
+        type: integer
+      inviter_id:
+        type: integer
+      lark_id:
+        type: string
+      oidc_id:
+        type: string
+      password:
+        maxLength: 20
+        minLength: 8
+        type: string
+      quota:
+        type: integer
+      request_count:
+        description: request number
+        type: integer
+      role:
+        description: admin, util
+        type: integer
+      status:
+        description: enabled, disabled
+        type: integer
+      used_quota:
+        description: used quota
+        type: integer
+      username:
+        maxLength: 12
+        type: string
+      verification_code:
+        description: this field is only for Email verification, don't save it to database!
+        type: string
+      wechat_id:
+        type: string
+    type: object
+  service.CreateChannelRequest:
+    properties:
+      balance:
+        type: number
+      base_url:
+        type: string
+      config:
+        type: string
+      group:
+        type: string
+      key:
+        type: string
+      model_mapping:
+        type: string
+      models:
+        type: string
+      name:
+        type: string
+      other:
+        type: string
+      priority:
+        type: integer
+      system_prompt:
+        type: string
+      type:
+        type: integer
+      weight:
+        type: integer
+    type: object
+  service.CreateRedemptionRequest:
+    properties:
+      count:
+        type: integer
+      name:
+        type: string
+      quota:
+        type: integer
+    type: object
+  service.CreateTokenRequest:
+    properties:
+      expired_time:
+        type: integer
+      models:
+        type: string
+      name:
+        type: string
+      remain_quota:
+        type: integer
+      subnet:
+        type: string
+      unlimited_quota:
+        type: boolean
+    type: object
+  service.ManageAction:
+    enum:
+    - disable
+    - enable
+    - delete
+    - promote
+    - demote
+    type: string
+    x-enum-varnames:
+    - ManageActionDisable
+    - ManageActionEnable
+    - ManageActionDelete
+    - ManageActionPromote
+    - ManageActionDemote
+  service.ManageUserRequest:
+    properties:
+      action:
+        $ref: '#/definitions/service.ManageAction'
+      username:
+        type: string
+    type: object
+  service.RegisterRequest:
+    properties:
+      aff_code:
+        type: string
+      display_name:
+        type: string
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+      verification_code:
+        type: string
+    type: object
+  service.UpdateRedemptionRequest:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      quota:
+        type: integer
+      status:
+        type: integer
+    type: object
+  service.UpdateTokenRequest:
+    properties:
+      expired_time:
+        type: integer
+      id:
+        type: integer
+      models:
+        type: string
+      name:
+        type: string
+      remain_quota:
+        type: integer
+      status:
+        type: integer
+      subnet:
+        type: string
+      unlimited_quota:
+        type: boolean
+    type: object
+  service.UserUpdateParams:
+    properties:
+      display_name:
+        type: string
+      id:
+        type: integer
+      password:
+        type: string
+      quota:
+        type: integer
+      role:
+        type: integer
+      username:
+        type: string
+    type: object
+host: localhost:3000
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: One API 后台管理接口文档
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: One API
+  version: "1.0"
+paths:
+  /api/about:
+    get:
+      consumes:
+      - application/json
+      description: 获取关于页面内容
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 获取关于页面
+      tags:
+      - 系统
+  /api/channel/:
+    get:
+      consumes:
+      - application/json
+      description: 获取渠道列表，需要管理员权限
+      parameters:
+      - default: 0
+        description: 页码
+        in: query
+        name: p
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 获取所有渠道
+      tags:
+      - 渠道管理
+    post:
+      consumes:
+      - application/json
+      description: 创建新渠道，需要管理员权限
+      parameters:
+      - description: 创建请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateChannelRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 创建渠道
+      tags:
+      - 渠道管理
+    put:
+      consumes:
+      - application/json
+      description: 更新渠道信息，需要管理员权限
+      parameters:
+      - description: 更新请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.Channel'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/model.Channel'
+      security:
+      - UserAuth: []
+      summary: 更新渠道
+      tags:
+      - 渠道管理
+  /api/channel/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 删除指定渠道，需要管理员权限
+      parameters:
+      - description: 渠道 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 删除渠道
+      tags:
+      - 渠道管理
+    get:
+      consumes:
+      - application/json
+      description: 获取渠道详情，需要管理员权限
+      parameters:
+      - description: 渠道 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/model.Channel'
+      security:
+      - UserAuth: []
+      summary: 获取指定渠道
+      tags:
+      - 渠道管理
+  /api/channel/disabled:
+    delete:
+      consumes:
+      - application/json
+      description: 删除所有禁用的渠道，需要管理员权限
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 删除禁用渠道
+      tags:
+      - 渠道管理
+  /api/channel/search:
+    get:
+      consumes:
+      - application/json
+      description: 根据关键词搜索渠道，需要管理员权限
+      parameters:
+      - description: 搜索关键词
+        in: query
+        name: keyword
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 搜索渠道
+      tags:
+      - 渠道管理
+  /api/home_page_content:
+    get:
+      consumes:
+      - application/json
+      description: 获取首页展示内容
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 获取首页内容
+      tags:
+      - 系统
+  /api/log/:
+    delete:
+      consumes:
+      - application/json
+      description: 删除指定时间之前的日志，需要管理员权限
+      parameters:
+      - description: 目标时间戳
+        in: query
+        name: target_timestamp
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 删除历史日志
+      tags:
+      - 日志
+    get:
+      consumes:
+      - application/json
+      description: 获取日志列表，需要管理员权限
+      parameters:
+      - default: 0
+        description: 页码
+        in: query
+        name: p
+        type: integer
+      - description: 日志类型
+        in: query
+        name: type
+        type: integer
+      - description: 开始时间戳
+        in: query
+        name: start_timestamp
+        type: integer
+      - description: 结束时间戳
+        in: query
+        name: end_timestamp
+        type: integer
+      - description: 用户名
+        in: query
+        name: username
+        type: string
+      - description: 令牌名称
+        in: query
+        name: token_name
+        type: string
+      - description: 模型名称
+        in: query
+        name: model_name
+        type: string
+      - description: 渠道 ID
+        in: query
+        name: channel
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 获取所有日志
+      tags:
+      - 日志
+  /api/log/search:
+    get:
+      consumes:
+      - application/json
+      description: 根据关键词搜索日志，需要管理员权限
+      parameters:
+      - description: 搜索关键词
+        in: query
+        name: keyword
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 搜索所有日志
+      tags:
+      - 日志
+  /api/log/self:
+    get:
+      consumes:
+      - application/json
+      description: 获取当前用户的日志
+      parameters:
+      - default: 0
+        description: 页码
+        in: query
+        name: p
+        type: integer
+      - description: 日志类型
+        in: query
+        name: type
+        type: integer
+      - description: 开始时间戳
+        in: query
+        name: start_timestamp
+        type: integer
+      - description: 结束时间戳
+        in: query
+        name: end_timestamp
+        type: integer
+      - description: 令牌名称
+        in: query
+        name: token_name
+        type: string
+      - description: 模型名称
+        in: query
+        name: model_name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 获取用户日志
+      tags:
+      - 日志
+  /api/log/self/search:
+    get:
+      consumes:
+      - application/json
+      description: 根据关键词搜索当前用户的日志
+      parameters:
+      - description: 搜索关键词
+        in: query
+        name: keyword
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 搜索用户日志
+      tags:
+      - 日志
+  /api/log/self/stat:
+    get:
+      consumes:
+      - application/json
+      description: 获取当前用户的日志统计
+      parameters:
+      - description: 日志类型
+        in: query
+        name: type
+        type: integer
+      - description: 开始时间戳
+        in: query
+        name: start_timestamp
+        type: integer
+      - description: 结束时间戳
+        in: query
+        name: end_timestamp
+        type: integer
+      - description: 令牌名称
+        in: query
+        name: token_name
+        type: string
+      - description: 模型名称
+        in: query
+        name: model_name
+        type: string
+      - description: 渠道 ID
+        in: query
+        name: channel
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 获取用户日志统计
+      tags:
+      - 日志
+  /api/log/stat:
+    get:
+      consumes:
+      - application/json
+      description: 获取日志统计数据，需要管理员权限
+      parameters:
+      - description: 日志类型
+        in: query
+        name: type
+        type: integer
+      - description: 开始时间戳
+        in: query
+        name: start_timestamp
+        type: integer
+      - description: 结束时间戳
+        in: query
+        name: end_timestamp
+        type: integer
+      - description: 令牌名称
+        in: query
+        name: token_name
+        type: string
+      - description: 用户名
+        in: query
+        name: username
+        type: string
+      - description: 模型名称
+        in: query
+        name: model_name
+        type: string
+      - description: 渠道 ID
+        in: query
+        name: channel
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 获取日志统计
+      tags:
+      - 日志
+  /api/notice:
+    get:
+      consumes:
+      - application/json
+      description: 获取系统公告内容
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 获取公告
+      tags:
+      - 系统
+  /api/oauth/email/bind:
+    get:
+      consumes:
+      - application/json
+      description: 绑定用户邮箱
+      parameters:
+      - description: 邮箱地址
+        in: query
+        name: email
+        required: true
+        type: string
+      - description: 验证码
+        in: query
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 绑定邮箱
+      tags:
+      - OAuth
+  /api/option/:
+    get:
+      consumes:
+      - application/json
+      description: 获取所有系统设置，需要 Root 权限
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 获取系统设置
+      tags:
+      - 系统设置
+    put:
+      consumes:
+      - application/json
+      description: 更新系统设置，需要 Root 权限
+      parameters:
+      - description: 设置请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.Option'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 更新系统设置
+      tags:
+      - 系统设置
+  /api/redemption/:
+    get:
+      consumes:
+      - application/json
+      description: 获取兑换码列表，需要管理员权限
+      parameters:
+      - default: 0
+        description: 页码
+        in: query
+        name: p
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 获取所有兑换码
+      tags:
+      - 兑换码
+    post:
+      consumes:
+      - application/json
+      description: 创建新兑换码，需要管理员权限
+      parameters:
+      - description: 创建请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateRedemptionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 创建兑换码
+      tags:
+      - 兑换码
+  /api/redemption/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 删除指定兑换码，需要管理员权限
+      parameters:
+      - description: 兑换码 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 删除兑换码
+      tags:
+      - 兑换码
+    get:
+      consumes:
+      - application/json
+      description: 获取兑换码详情，需要管理员权限
+      parameters:
+      - description: 兑换码 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/model.Redemption'
+      security:
+      - UserAuth: []
+      summary: 获取指定兑换码
+      tags:
+      - 兑换码
+    put:
+      consumes:
+      - application/json
+      description: 更新兑换码信息，需要管理员权限
+      parameters:
+      - description: 兑换码 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 是否只更新状态
+        in: query
+        name: status_only
+        type: boolean
+      - description: 更新请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateRedemptionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/model.Redemption'
+      security:
+      - UserAuth: []
+      summary: 更新兑换码
+      tags:
+      - 兑换码
+  /api/redemption/search:
+    get:
+      consumes:
+      - application/json
+      description: 根据关键词搜索兑换码，需要管理员权限
+      parameters:
+      - description: 搜索关键词
+        in: query
+        name: keyword
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 搜索兑换码
+      tags:
+      - 兑换码
+  /api/reset_password:
+    get:
+      consumes:
+      - application/json
+      description: 发送密码重置邮件，有频率限制
+      parameters:
+      - description: 邮箱地址
+        in: query
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 发送密码重置邮件
+      tags:
+      - 用户认证
+  /api/status:
+    get:
+      consumes:
+      - application/json
+      description: 获取系统状态信息，包括版本、功能开关等
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 获取系统状态
+      tags:
+      - 系统
+  /api/token/:
+    get:
+      consumes:
+      - application/json
+      description: 获取当前用户的所有令牌
+      parameters:
+      - default: 0
+        description: 页码
+        in: query
+        name: p
+        type: integer
+      - description: 排序方式
+        enum:
+        - remain_quota
+        - used_quota
+        in: query
+        name: order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 获取所有令牌
+      tags:
+      - 令牌管理
+    post:
+      consumes:
+      - application/json
+      description: 创建新令牌
+      parameters:
+      - description: 创建请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/model.Token'
+      security:
+      - UserAuth: []
+      summary: 创建令牌
+      tags:
+      - 令牌管理
+    put:
+      consumes:
+      - application/json
+      description: 更新令牌信息
+      parameters:
+      - description: 更新请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/model.Token'
+      security:
+      - UserAuth: []
+      summary: 更新令牌
+      tags:
+      - 令牌管理
+  /api/token/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 删除指定令牌
+      parameters:
+      - description: 令牌 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 删除令牌
+      tags:
+      - 令牌管理
+    get:
+      consumes:
+      - application/json
+      description: 获取令牌详情
+      parameters:
+      - description: 令牌 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/model.Token'
+      security:
+      - UserAuth: []
+      summary: 获取指定令牌
+      tags:
+      - 令牌管理
+  /api/token/search:
+    get:
+      consumes:
+      - application/json
+      description: 根据关键词搜索令牌
+      parameters:
+      - description: 搜索关键词
+        in: query
+        name: keyword
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 搜索令牌
+      tags:
+      - 令牌管理
+  /api/topup:
+    post:
+      consumes:
+      - application/json
+      description: 管理员为用户充值额度
+      parameters:
+      - description: 充值请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controller.adminTopUpRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 管理员充值
+      tags:
+      - 充值
+  /api/user/:
+    get:
+      consumes:
+      - application/json
+      description: 获取用户列表，需要管理员权限
+      parameters:
+      - default: 0
+        description: 页码
+        in: query
+        name: p
+        type: integer
+      - description: 排序方式
+        enum:
+        - quota
+        - used_quota
+        - request_count
+        in: query
+        name: order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 获取所有用户
+      tags:
+      - 用户管理
+    post:
+      consumes:
+      - application/json
+      description: 创建新用户，需要管理员权限
+      parameters:
+      - description: 创建请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 创建用户
+      tags:
+      - 用户管理
+    put:
+      consumes:
+      - application/json
+      description: 更新用户信息，需要管理员权限
+      parameters:
+      - description: 更新请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UserUpdateParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 更新用户
+      tags:
+      - 用户管理
+  /api/user/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 删除指定用户，需要管理员权限
+      parameters:
+      - description: 用户 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 删除用户
+      tags:
+      - 用户管理
+    get:
+      consumes:
+      - application/json
+      description: 获取用户详情，需要管理员权限
+      parameters:
+      - description: 用户 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/model.User'
+      security:
+      - UserAuth: []
+      summary: 获取指定用户
+      tags:
+      - 用户管理
+  /api/user/aff:
+    get:
+      consumes:
+      - application/json
+      description: 获取用户的邀请码
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 获取邀请码
+      tags:
+      - 用户管理
+  /api/user/dashboard:
+    get:
+      consumes:
+      - application/json
+      description: 获取用户最近7天的使用统计
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 获取用户仪表盘
+      tags:
+      - 用户管理
+  /api/user/login:
+    post:
+      consumes:
+      - application/json
+      description: 用户名密码登录，有频率限制
+      parameters:
+      - description: 登录请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controller.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/model.User'
+      summary: 用户登录
+      tags:
+      - 用户认证
+  /api/user/logout:
+    get:
+      consumes:
+      - application/json
+      description: 清除用户会话
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 用户登出
+      tags:
+      - 用户认证
+  /api/user/manage:
+    post:
+      consumes:
+      - application/json
+      description: 管理员操作用户，如启用/禁用、设置额度等
+      parameters:
+      - description: 管理请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ManageUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 管理用户
+      tags:
+      - 用户管理
+  /api/user/register:
+    post:
+      consumes:
+      - application/json
+      description: 新用户注册，有频率限制
+      parameters:
+      - description: 注册请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 用户注册
+      tags:
+      - 用户认证
+  /api/user/reset:
+    post:
+      consumes:
+      - application/json
+      description: 通过邮箱验证码重置密码
+      parameters:
+      - description: 重置密码请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controller.PasswordResetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功，data为新密码
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 重置密码
+      tags:
+      - 用户认证
+  /api/user/search:
+    get:
+      consumes:
+      - application/json
+      description: 根据关键词搜索用户，需要管理员权限
+      parameters:
+      - description: 搜索关键词
+        in: query
+        name: keyword
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 搜索用户
+      tags:
+      - 用户管理
+  /api/user/self:
+    delete:
+      consumes:
+      - application/json
+      description: 删除当前登录用户
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 注销当前用户
+      tags:
+      - 用户管理
+    get:
+      consumes:
+      - application/json
+      description: 获取当前登录用户的详细信息
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/model.User'
+      security:
+      - UserAuth: []
+      summary: 获取当前用户信息
+      tags:
+      - 用户管理
+    put:
+      consumes:
+      - application/json
+      description: 更新当前登录用户的信息
+      parameters:
+      - description: 更新请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 更新当前用户信息
+      tags:
+      - 用户管理
+  /api/user/token:
+    get:
+      consumes:
+      - application/json
+      description: 生成用户的访问令牌
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 生成访问令牌
+      tags:
+      - 用户管理
+  /api/user/topup:
+    post:
+      consumes:
+      - application/json
+      description: 使用兑换码充值
+      parameters:
+      - description: 充值请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controller.topUpRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 用户充值
+      tags:
+      - 充值
+  /api/verification:
+    get:
+      consumes:
+      - application/json
+      description: 发送邮箱验证码，有频率限制
+      parameters:
+      - description: 邮箱地址
+        in: query
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 发送邮箱验证码
+      tags:
+      - 用户认证
+  /dashboard/billing/subscription:
+    get:
+      consumes:
+      - application/json
+      description: 获取令牌的额度信息
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - UserAuth: []
+      summary: 获取令牌状态
+      tags:
+      - 令牌管理
+schemes:
+- http
+- https
+securityDefinitions:
+  UserAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

@@ -1,0 +1,32 @@
+name: Deploy One-API to Local Machine
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: self-hosted # 运行在你本地用 pm2 守护的 runner 上
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Update One-API Only
+        run: |
+          echo "========== 开始单独更新 one-api 服务 =========="
+
+          # 关键：在命令最后加上 one-api
+          # 这样 Docker 只会对 one-api 进行重新 Build 并重启该容器
+          # mysql 和 redis 容器会保持原样，完全不受影响
+          docker compose up -d --build one-api
+
+          echo "========== one-api 容器已重启，正在清理残留镜像 =========="
+
+      - name: Clean Up Old Images
+        run: |
+          # 清理因为重新 build 而产生的旧 one-api:<none> 镜像
+          docker image prune -f
+          echo "========== 部署完成！ =========="

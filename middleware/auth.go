@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/songquanpeng/one-api/common/blacklist"
 	"github.com/songquanpeng/one-api/common/ctxkey"
+	"github.com/songquanpeng/one-api/common/i18n"
 	"github.com/songquanpeng/one-api/common/network"
 	"github.com/songquanpeng/one-api/model"
 	"net/http"
@@ -24,7 +25,7 @@ func authHelper(c *gin.Context, minRole int) {
 		if accessToken == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"success": false,
-				"message": "无权进行此操作，未登录且未提供 access token",
+				"message": i18n.Translate(c, "unauthorized_no_token"),
 			})
 			c.Abort()
 			return
@@ -39,7 +40,7 @@ func authHelper(c *gin.Context, minRole int) {
 		} else {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,
-				"message": "无权进行此操作，access token 无效",
+				"message": i18n.Translate(c, "invalid_access_token"),
 			})
 			c.Abort()
 			return
@@ -48,7 +49,7 @@ func authHelper(c *gin.Context, minRole int) {
 	if status.(int) == model.UserStatusDisabled || blacklist.IsUserBanned(id.(int)) {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "用户已被封禁",
+			"message": i18n.Translate(c, "user_banned"),
 		})
 		session := sessions.Default(c)
 		session.Clear()
@@ -59,7 +60,7 @@ func authHelper(c *gin.Context, minRole int) {
 	if role.(int) < minRole {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "无权进行此操作，权限不足",
+			"message": i18n.Translate(c, "insufficient_permission"),
 		})
 		c.Abort()
 		return
@@ -103,7 +104,7 @@ func TokenAuth() func(c *gin.Context) {
 		}
 		if token.Subnet != nil && *token.Subnet != "" {
 			if !network.IsIpInSubnets(ctx, c.ClientIP(), *token.Subnet) {
-				abortWithMessage(c, http.StatusForbidden, fmt.Sprintf("该令牌只能在指定网段使用：%s，当前 ip：%s", *token.Subnet, c.ClientIP()))
+				abortWithMessage(c, http.StatusForbidden, fmt.Sprintf("%s：%s，%s：%s", i18n.Translate(c, "token_subnet_restricted"), *token.Subnet, i18n.Translate(c, "current_ip"), c.ClientIP()))
 				return
 			}
 		}
@@ -113,7 +114,7 @@ func TokenAuth() func(c *gin.Context) {
 			return
 		}
 		if !userEnabled || blacklist.IsUserBanned(token.UserId) {
-			abortWithMessage(c, http.StatusForbidden, "用户已被封禁")
+			abortWithMessage(c, http.StatusForbidden, i18n.Translate(c, "user_banned"))
 			return
 		}
 		requestModel, err := getRequestModel(c)
@@ -125,7 +126,7 @@ func TokenAuth() func(c *gin.Context) {
 		if token.Models != nil && *token.Models != "" {
 			c.Set(ctxkey.AvailableModels, *token.Models)
 			if requestModel != "" && !isModelInList(requestModel, *token.Models) {
-				abortWithMessage(c, http.StatusForbidden, fmt.Sprintf("该令牌无权使用模型：%s", requestModel))
+				abortWithMessage(c, http.StatusForbidden, fmt.Sprintf("%s：%s", i18n.Translate(c, "token_model_restricted"), requestModel))
 				return
 			}
 		}
@@ -136,7 +137,7 @@ func TokenAuth() func(c *gin.Context) {
 			if model.IsAdmin(token.UserId) {
 				c.Set(ctxkey.SpecificChannelId, parts[1])
 			} else {
-				abortWithMessage(c, http.StatusForbidden, "普通用户不支持指定渠道")
+				abortWithMessage(c, http.StatusForbidden, i18n.Translate(c, "normal_user_no_channel_specify"))
 				return
 			}
 		}

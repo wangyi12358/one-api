@@ -9,9 +9,16 @@ import (
 	"net/http"
 	"os"
 	"strings"
+
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	_ "github.com/songquanpeng/one-api/docs"
 )
 
 func SetRouter(router *gin.Engine, buildFS embed.FS) {
+	// Swagger 路由
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	SetApiRouter(router)
 	SetDashboardRouter(router)
 	SetRelayRouter(router)
