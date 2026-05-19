@@ -1,18 +1,26 @@
 package controller
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/songquanpeng/one-api/common"
 	"github.com/songquanpeng/one-api/common/config"
 	"github.com/songquanpeng/one-api/common/ctxkey"
-	"github.com/songquanpeng/one-api/common/helper"
-	"github.com/songquanpeng/one-api/common/network"
-	"github.com/songquanpeng/one-api/common/random"
-	"github.com/songquanpeng/one-api/model"
+	"github.com/songquanpeng/one-api/service"
 	"net/http"
 	"strconv"
 )
 
+// GetAllTokens
+// @Summary 获取所有令牌
+// @Description 获取当前用户的所有令牌
+// @Tags 令牌管理
+// @Accept json
+// @Produce json
+// @Security UserAuth
+// @Param p query int false "页码" default(0)
+// @Param order query string false "排序方式" Enums(remain_quota, used_quota)
+// @Success 200 {object} map[string]interface{} "成功"
+// @Router /api/token/ [get]
 func GetAllTokens(c *gin.Context) {
 	userId := c.GetInt(ctxkey.Id)
 	p, _ := strconv.Atoi(c.Query("p"))
@@ -21,77 +29,80 @@ func GetAllTokens(c *gin.Context) {
 	}
 
 	order := c.Query("order")
-	tokens, err := model.GetAllUserTokens(userId, p*config.ItemsPerPage, config.ItemsPerPage, order)
+	tokenService := service.GetTokenService()
+	tokens, err := tokenService.GetAllTokens(userId, p*config.ItemsPerPage, config.ItemsPerPage, order)
 
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"message": err.Error(),
-		})
+		common.ApiError(c, err)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "",
-		"data":    tokens,
-	})
-	return
+	common.ApiSuccess(c, tokens)
 }
 
+// SearchTokens
+// @Summary 搜索令牌
+// @Description 根据关键词搜索令牌
+// @Tags 令牌管理
+// @Accept json
+// @Produce json
+// @Security UserAuth
+// @Param keyword query string true "搜索关键词"
+// @Success 200 {object} map[string]interface{} "成功"
+// @Router /api/token/search [get]
 func SearchTokens(c *gin.Context) {
 	userId := c.GetInt(ctxkey.Id)
 	keyword := c.Query("keyword")
-	tokens, err := model.SearchUserTokens(userId, keyword)
+	tokenService := service.GetTokenService()
+	tokens, err := tokenService.SearchTokens(userId, keyword)
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"message": err.Error(),
-		})
+		common.ApiError(c, err)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "",
-		"data":    tokens,
-	})
-	return
+	common.ApiSuccess(c, tokens)
 }
 
+// GetToken
+// @Summary 获取指定令牌
+// @Description 获取令牌详情
+// @Tags 令牌管理
+// @Accept json
+// @Produce json
+// @Security UserAuth
+// @Param id path int true "令牌 ID"
+// @Success 200 {object} model.Token "成功"
+// @Router /api/token/{id} [get]
 func GetToken(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	userId := c.GetInt(ctxkey.Id)
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"message": err.Error(),
-		})
+		common.ApiError(c, err)
 		return
 	}
-	token, err := model.GetTokenByIds(id, userId)
+	tokenService := service.GetTokenService()
+	token, err := tokenService.GetToken(id, userId)
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"message": err.Error(),
-		})
+		common.ApiError(c, err)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "",
-		"data":    token,
-	})
-	return
+	common.ApiSuccess(c, token)
 }
 
+// GetTokenStatus
+// @Summary 获取令牌状态
+// @Description 获取令牌的额度信息
+// @Tags 令牌管理
+// @Accept json
+// @Produce json
+// @Security UserAuth
+// @Success 200 {object} map[string]interface{} "成功"
+// @Router /dashboard/billing/subscription [get]
 func GetTokenStatus(c *gin.Context) {
 	tokenId := c.GetInt(ctxkey.TokenId)
 	userId := c.GetInt(ctxkey.Id)
-	token, err := model.GetTokenByIds(tokenId, userId)
+	tokenService := service.GetTokenService()
+	token, err := tokenService.GetToken(tokenId, userId)
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"message": err.Error(),
-		})
+		common.ApiError(c, err)
 		return
 	}
 	expiredAt := token.ExpiredTime
@@ -107,151 +118,82 @@ func GetTokenStatus(c *gin.Context) {
 	})
 }
 
-func validateToken(c *gin.Context, token model.Token) error {
-	if len(token.Name) > 30 {
-		return fmt.Errorf("令牌名称过长")
-	}
-	if token.Subnet != nil && *token.Subnet != "" {
-		err := network.IsValidSubnets(*token.Subnet)
-		if err != nil {
-			return fmt.Errorf("无效的网段：%s", err.Error())
-		}
-	}
-	return nil
-}
-
+// AddToken
+// @Summary 创建令牌
+// @Description 创建新令牌
+// @Tags 令牌管理
+// @Accept json
+// @Produce json
+// @Security UserAuth
+// @Param request body service.CreateTokenRequest true "创建请求"
+// @Success 200 {object} model.Token "成功"
+// @Router /api/token/ [post]
 func AddToken(c *gin.Context) {
-	token := model.Token{}
-	err := c.ShouldBindJSON(&token)
+	var req service.CreateTokenRequest
+	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"message": err.Error(),
-		})
-		return
-	}
-	err = validateToken(c, token)
-	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("参数错误：%s", err.Error()),
-		})
+		common.ApiError(c, err)
 		return
 	}
 
-	cleanToken := model.Token{
-		UserId:         c.GetInt(ctxkey.Id),
-		Name:           token.Name,
-		Key:            random.GenerateKey(),
-		CreatedTime:    helper.GetTimestamp(),
-		AccessedTime:   helper.GetTimestamp(),
-		ExpiredTime:    token.ExpiredTime,
-		RemainQuota:    token.RemainQuota,
-		UnlimitedQuota: token.UnlimitedQuota,
-		Models:         token.Models,
-		Subnet:         token.Subnet,
-	}
-	err = cleanToken.Insert()
+	userId := c.GetInt(ctxkey.Id)
+	tokenService := service.GetTokenService()
+	token, err := tokenService.CreateToken(userId, &req)
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"message": err.Error(),
-		})
+		common.ApiError(c, err)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "",
-		"data":    cleanToken,
-	})
-	return
+	common.ApiSuccess(c, token)
 }
 
+// DeleteToken
+// @Summary 删除令牌
+// @Description 删除指定令牌
+// @Tags 令牌管理
+// @Accept json
+// @Produce json
+// @Security UserAuth
+// @Param id path int true "令牌 ID"
+// @Success 200 {object} map[string]interface{} "成功"
+// @Router /api/token/{id} [delete]
 func DeleteToken(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	userId := c.GetInt(ctxkey.Id)
-	err := model.DeleteTokenById(id, userId)
+	tokenService := service.GetTokenService()
+	err := tokenService.DeleteToken(id, userId)
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"message": err.Error(),
-		})
+		common.ApiError(c, err)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "",
-	})
-	return
+	common.ApiSuccess(c, nil)
 }
 
+// UpdateToken
+// @Summary 更新令牌
+// @Description 更新令牌信息
+// @Tags 令牌管理
+// @Accept json
+// @Produce json
+// @Security UserAuth
+// @Param request body service.UpdateTokenRequest true "更新请求"
+// @Success 200 {object} model.Token "成功"
+// @Router /api/token/ [put]
 func UpdateToken(c *gin.Context) {
 	userId := c.GetInt(ctxkey.Id)
 	statusOnly := c.Query("status_only")
-	token := model.Token{}
-	err := c.ShouldBindJSON(&token)
+
+	var req service.UpdateTokenRequest
+	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"message": err.Error(),
-		})
+		common.ApiError(c, err)
 		return
 	}
-	err = validateToken(c, token)
+
+	tokenService := service.GetTokenService()
+	token, err := tokenService.UpdateToken(userId, &req, statusOnly != "")
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("参数错误：%s", err.Error()),
-		})
+		common.ApiError(c, err)
 		return
 	}
-	cleanToken, err := model.GetTokenByIds(token.Id, userId)
-	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"message": err.Error(),
-		})
-		return
-	}
-	if token.Status == model.TokenStatusEnabled {
-		if cleanToken.Status == model.TokenStatusExpired && cleanToken.ExpiredTime <= helper.GetTimestamp() && cleanToken.ExpiredTime != -1 {
-			c.JSON(http.StatusOK, gin.H{
-				"success": false,
-				"message": "令牌已过期，无法启用，请先修改令牌过期时间，或者设置为永不过期",
-			})
-			return
-		}
-		if cleanToken.Status == model.TokenStatusExhausted && cleanToken.RemainQuota <= 0 && !cleanToken.UnlimitedQuota {
-			c.JSON(http.StatusOK, gin.H{
-				"success": false,
-				"message": "令牌可用额度已用尽，无法启用，请先修改令牌剩余额度，或者设置为无限额度",
-			})
-			return
-		}
-	}
-	if statusOnly != "" {
-		cleanToken.Status = token.Status
-	} else {
-		// If you add more fields, please also update token.Update()
-		cleanToken.Name = token.Name
-		cleanToken.ExpiredTime = token.ExpiredTime
-		cleanToken.RemainQuota = token.RemainQuota
-		cleanToken.UnlimitedQuota = token.UnlimitedQuota
-		cleanToken.Models = token.Models
-		cleanToken.Subnet = token.Subnet
-	}
-	err = cleanToken.Update()
-	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"message": err.Error(),
-		})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "",
-		"data":    cleanToken,
-	})
-	return
+	common.ApiSuccess(c, token)
 }

@@ -15,6 +15,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// GetStatus
+// @Summary 获取系统状态
+// @Description 获取系统状态信息，包括版本、功能开关等
+// @Tags 系统
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string]interface{} "成功"
+// @Router /api/status [get]
 func GetStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
@@ -49,6 +57,14 @@ func GetStatus(c *gin.Context) {
 	return
 }
 
+// GetNotice
+// @Summary 获取公告
+// @Description 获取系统公告内容
+// @Tags 系统
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string]interface{} "成功"
+// @Router /api/notice [get]
 func GetNotice(c *gin.Context) {
 	config.OptionMapRWMutex.RLock()
 	defer config.OptionMapRWMutex.RUnlock()
@@ -60,6 +76,14 @@ func GetNotice(c *gin.Context) {
 	return
 }
 
+// GetAbout
+// @Summary 获取关于页面
+// @Description 获取关于页面内容
+// @Tags 系统
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string]interface{} "成功"
+// @Router /api/about [get]
 func GetAbout(c *gin.Context) {
 	config.OptionMapRWMutex.RLock()
 	defer config.OptionMapRWMutex.RUnlock()
@@ -71,6 +95,14 @@ func GetAbout(c *gin.Context) {
 	return
 }
 
+// GetHomePageContent
+// @Summary 获取首页内容
+// @Description 获取首页展示内容
+// @Tags 系统
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string]interface{} "成功"
+// @Router /api/home_page_content [get]
 func GetHomePageContent(c *gin.Context) {
 	config.OptionMapRWMutex.RLock()
 	defer config.OptionMapRWMutex.RUnlock()
@@ -82,6 +114,15 @@ func GetHomePageContent(c *gin.Context) {
 	return
 }
 
+// SendEmailVerification
+// @Summary 发送邮箱验证码
+// @Description 发送邮箱验证码，有频率限制
+// @Tags 用户认证
+// @Accept json
+// @Produce json
+// @Param email query string true "邮箱地址"
+// @Success 200 {object} map[string]interface{} "成功"
+// @Router /api/verification [get]
 func SendEmailVerification(c *gin.Context) {
 	email := c.Query("email")
 	if err := common.Validate.Var(email, "required,email"); err != nil {
@@ -102,7 +143,7 @@ func SendEmailVerification(c *gin.Context) {
 		if !allowed {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,
-				"message": "管理员启用了邮箱域名白名单，您的邮箱地址的域名不在白名单中",
+				"message": i18n.Translate(c, "email_domain_whitelist"),
 			})
 			return
 		}
@@ -110,7 +151,7 @@ func SendEmailVerification(c *gin.Context) {
 	if model.IsEmailAlreadyTaken(email) {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "邮箱地址已被占用",
+			"message": i18n.Translate(c, "email_already_taken"),
 		})
 		return
 	}
@@ -142,6 +183,15 @@ func SendEmailVerification(c *gin.Context) {
 	return
 }
 
+// SendPasswordResetEmail
+// @Summary 发送密码重置邮件
+// @Description 发送密码重置邮件，有频率限制
+// @Tags 用户认证
+// @Accept json
+// @Produce json
+// @Param email query string true "邮箱地址"
+// @Success 200 {object} map[string]interface{} "成功"
+// @Router /api/reset_password [get]
 func SendPasswordResetEmail(c *gin.Context) {
 	email := c.Query("email")
 	if err := common.Validate.Var(email, "required,email"); err != nil {
@@ -154,7 +204,7 @@ func SendPasswordResetEmail(c *gin.Context) {
 	if !model.IsEmailAlreadyTaken(email) {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "该邮箱地址未注册",
+			"message": i18n.Translate(c, "email_not_registered"),
 		})
 		return
 	}
@@ -196,6 +246,15 @@ type PasswordResetRequest struct {
 	Token string `json:"token"`
 }
 
+// ResetPassword
+// @Summary 重置密码
+// @Description 通过邮箱验证码重置密码
+// @Tags 用户认证
+// @Accept json
+// @Produce json
+// @Param request body PasswordResetRequest true "重置密码请求"
+// @Success 200 {object} map[string]interface{} "成功，data为新密码"
+// @Router /api/user/reset [post]
 func ResetPassword(c *gin.Context) {
 	var req PasswordResetRequest
 	err := json.NewDecoder(c.Request.Body).Decode(&req)
@@ -209,7 +268,7 @@ func ResetPassword(c *gin.Context) {
 	if !common.VerifyCodeWithKey(req.Email, req.Token, common.PasswordResetPurpose) {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "重置链接非法或已过期",
+			"message": i18n.Translate(c, "reset_link_invalid"),
 		})
 		return
 	}

@@ -6,6 +6,7 @@ import (
 	"github.com/songquanpeng/one-api/common/ctxkey"
 	"github.com/songquanpeng/one-api/model"
 	relaymodel "github.com/songquanpeng/one-api/relay/model"
+	"github.com/songquanpeng/one-api/service"
 )
 
 func GetSubscription(c *gin.Context) {
@@ -50,7 +51,7 @@ func GetSubscription(c *gin.Context) {
 	if token != nil && token.UnlimitedQuota {
 		amount = 100000000
 	}
-	subscription := OpenAISubscriptionResponse{
+	subscription := service.OpenAISubscriptionResponse{
 		Object:             "billing_subscription",
 		HasPaymentMethod:   true,
 		SoftLimitUSD:       amount,
@@ -88,7 +89,7 @@ func GetUsage(c *gin.Context) {
 	if config.DisplayInCurrencyEnabled {
 		amount /= config.QuotaPerUnit
 	}
-	usage := OpenAIUsageResponse{
+	usage := service.OpenAIUsageResponse{
 		Object:     "list",
 		TotalUsage: amount * 100,
 	}

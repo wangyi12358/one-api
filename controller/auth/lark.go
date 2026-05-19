@@ -13,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/songquanpeng/one-api/common/config"
+	"github.com/songquanpeng/one-api/common/i18n"
 	"github.com/songquanpeng/one-api/common/logger"
 	"github.com/songquanpeng/one-api/controller"
 	"github.com/songquanpeng/one-api/model"
@@ -138,7 +139,7 @@ func LarkOAuth(c *gin.Context) {
 		} else {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,
-				"message": "管理员关闭了新用户注册",
+				"message": i18n.Translate(c, "registration_disabled"),
 			})
 			return
 		}
@@ -146,7 +147,7 @@ func LarkOAuth(c *gin.Context) {
 
 	if user.Status != model.UserStatusEnabled {
 		c.JSON(http.StatusOK, gin.H{
-			"message": "用户已被封禁",
+			"message": i18n.Translate(c, "user_banned"),
 			"success": false,
 		})
 		return
@@ -170,7 +171,7 @@ func LarkBind(c *gin.Context) {
 	if model.IsLarkIdAlreadyTaken(user.LarkId) {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "该飞书账户已被绑定",
+			"message": i18n.Translate(c, "lark_already_bound"),
 		})
 		return
 	}

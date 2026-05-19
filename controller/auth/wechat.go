@@ -12,6 +12,7 @@ import (
 
 	"github.com/songquanpeng/one-api/common/config"
 	"github.com/songquanpeng/one-api/common/ctxkey"
+	"github.com/songquanpeng/one-api/common/i18n"
 	"github.com/songquanpeng/one-api/controller"
 	"github.com/songquanpeng/one-api/model"
 )
@@ -57,7 +58,7 @@ func WeChatAuth(c *gin.Context) {
 	ctx := c.Request.Context()
 	if !config.WeChatAuthEnabled {
 		c.JSON(http.StatusOK, gin.H{
-			"message": "管理员未开启通过微信登录以及注册",
+			"message": i18n.Translate(c, "wechat_login_disabled"),
 			"success": false,
 		})
 		return
@@ -100,7 +101,7 @@ func WeChatAuth(c *gin.Context) {
 		} else {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,
-				"message": "管理员关闭了新用户注册",
+				"message": i18n.Translate(c, "registration_disabled"),
 			})
 			return
 		}
@@ -108,7 +109,7 @@ func WeChatAuth(c *gin.Context) {
 
 	if user.Status != model.UserStatusEnabled {
 		c.JSON(http.StatusOK, gin.H{
-			"message": "用户已被封禁",
+			"message": i18n.Translate(c, "user_banned"),
 			"success": false,
 		})
 		return
@@ -119,7 +120,7 @@ func WeChatAuth(c *gin.Context) {
 func WeChatBind(c *gin.Context) {
 	if !config.WeChatAuthEnabled {
 		c.JSON(http.StatusOK, gin.H{
-			"message": "管理员未开启通过微信登录以及注册",
+			"message": i18n.Translate(c, "wechat_login_disabled"),
 			"success": false,
 		})
 		return
@@ -136,7 +137,7 @@ func WeChatBind(c *gin.Context) {
 	if model.IsWeChatIdAlreadyTaken(wechatId) {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "该微信账号已被绑定",
+			"message": i18n.Translate(c, "wechat_already_bound"),
 		})
 		return
 	}

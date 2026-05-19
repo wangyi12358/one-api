@@ -2,101 +2,53 @@ package controller
 
 import (
 	"encoding/json"
-	"net/http"
-	"strings"
-
-	"github.com/songquanpeng/one-api/common/config"
-	"github.com/songquanpeng/one-api/common/helper"
-	"github.com/songquanpeng/one-api/common/i18n"
-	"github.com/songquanpeng/one-api/model"
 
 	"github.com/gin-gonic/gin"
+	"github.com/songquanpeng/one-api/common"
+	"github.com/songquanpeng/one-api/common/i18n"
+	"github.com/songquanpeng/one-api/model"
+	"github.com/songquanpeng/one-api/service"
 )
 
+// GetOptions
+// @Summary 获取系统设置
+// @Description 获取所有系统设置，需要 Root 权限
+// @Tags 系统设置
+// @Accept json
+// @Produce json
+// @Security UserAuth
+// @Success 200 {object} map[string]interface{} "成功"
+// @Router /api/option/ [get]
 func GetOptions(c *gin.Context) {
-	var options []*model.Option
-	config.OptionMapRWMutex.Lock()
-	for k, v := range config.OptionMap {
-		if strings.HasSuffix(k, "Token") || strings.HasSuffix(k, "Secret") {
-			continue
-		}
-		options = append(options, &model.Option{
-			Key:   k,
-			Value: helper.Interface2String(v),
-		})
-	}
-	config.OptionMapRWMutex.Unlock()
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "",
-		"data":    options,
-	})
-	return
+	optionService := service.GetOptionService()
+	options := optionService.GetPublicOptions()
+	common.ApiSuccess(c, options)
 }
 
+// UpdateOption
+// @Summary 更新系统设置
+// @Description 更新系统设置，需要 Root 权限
+// @Tags 系统设置
+// @Accept json
+// @Produce json
+// @Security UserAuth
+// @Param request body model.Option true "设置请求"
+// @Success 200 {object} map[string]interface{} "成功"
+// @Router /api/option/ [put]
 func UpdateOption(c *gin.Context) {
 	var option model.Option
 	err := json.NewDecoder(c.Request.Body).Decode(&option)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": i18n.Translate(c, "invalid_parameter"),
-		})
+		common.ApiErrorMsg(c, i18n.Translate(c, "invalid_parameter"))
 		return
 	}
-	switch option.Key {
-	case "Theme":
-		if !config.ValidThemes[option.Value] {
-			c.JSON(http.StatusOK, gin.H{
-				"success": false,
-				"message": "无效的主题",
-			})
-			return
-		}
-	case "GitHubOAuthEnabled":
-		if option.Value == "true" && config.GitHubClientId == "" {
-			c.JSON(http.StatusOK, gin.H{
-				"success": false,
-				"message": "无法启用 GitHub OAuth，请先填入 GitHub Client Id 以及 GitHub Client Secret！",
-			})
-			return
-		}
-	case "EmailDomainRestrictionEnabled":
-		if option.Value == "true" && len(config.EmailDomainWhitelist) == 0 {
-			c.JSON(http.StatusOK, gin.H{
-				"success": false,
-				"message": "无法启用邮箱域名限制，请先填入限制的邮箱域名！",
-			})
-			return
-		}
-	case "WeChatAuthEnabled":
-		if option.Value == "true" && config.WeChatServerAddress == "" {
-			c.JSON(http.StatusOK, gin.H{
-				"success": false,
-				"message": "无法启用微信登录，请先填入微信登录相关配置信息！",
-			})
-			return
-		}
-	case "TurnstileCheckEnabled":
-		if option.Value == "true" && config.TurnstileSiteKey == "" {
-			c.JSON(http.StatusOK, gin.H{
-				"success": false,
-				"message": "无法启用 Turnstile 校验，请先填入 Turnstile 校验相关配置信息！",
-			})
-			return
-		}
-	}
-	err = model.UpdateOption(option.Key, option.Value)
+
+	optionService := service.GetOptionService()
+	err = optionService.UpdateOption(option.Key, option.Value)
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"message": err.Error(),
-		})
+		common.ApiError(c, err)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "",
-	})
-	return
+
+	common.ApiSuccess(c, nil)
 }
