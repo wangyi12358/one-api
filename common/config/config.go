@@ -164,3 +164,22 @@ var UserContentRequestTimeout = env.Int("USER_CONTENT_REQUEST_TIMEOUT", 30)
 
 var EnforceIncludeUsage = env.Bool("ENFORCE_INCLUDE_USAGE", false)
 var TestPrompt = env.String("TEST_PROMPT", "Output only your specific model name with no additional text.")
+
+// 支付配置
+var MinTopUp = env.Int("MIN_TOPUP", 1)
+
+// Stripe 配置
+var StripeApiSecret = env.String("STRIPE_API_SECRET", "")
+var StripeWebhookSecret = env.String("STRIPE_WEBHOOK_SECRET", "")
+var StripePriceId = env.String("STRIPE_PRICE_ID", "")
+var StripeUnitPrice = env.Float64("STRIPE_UNIT_PRICE", 1.0)
+var StripeSuccessURL = env.String("STRIPE_SUCCESS_URL", "")
+var StripeCancelURL = env.String("STRIPE_CANCEL_URL", "")
+
+// 支付宝配置
+var AlipayAppId = env.String("ALIPAY_APP_ID", "")
+var AlipayPrivateKey = env.String("ALIPAY_PRIVATE_KEY", "")
+var AlipayPublicKey = env.String("ALIPAY_PUBLIC_KEY", "")
+var AlipayNotifyURL = env.String("ALIPAY_NOTIFY_URL", "")
+var AlipayReturnURL = env.String("ALIPAY_RETURN_URL", "")
+var AlipayUnitPrice = env.Float64("ALIPAY_UNIT_PRICE", 1.0)

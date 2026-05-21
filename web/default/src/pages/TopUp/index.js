@@ -7,6 +7,8 @@ import {
   Card,
   Statistic,
   Divider,
+  Message,
+  Icon,
 } from 'semantic-ui-react';
 import { API, showError, showInfo, showSuccess } from '../../helpers';
 import { renderQuota } from '../../helpers/render';
@@ -19,6 +21,10 @@ const TopUp = () => {
   const [userQuota, setUserQuota] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [user, setUser] = useState({});
+  const [payMethods, setPayMethods] = useState([]);
+  const [selectedMethod, setSelectedMethod] = useState('');
+  const [amount, setAmount] = useState(1);
+  const [minTopUp, setMinTopUp] = useState(1);
 
   const topUp = async () => {
     if (redemptionCode === '') {
@@ -72,6 +78,64 @@ const TopUp = () => {
     }
   };
 
+  const getTopUpInfo = async () => {
+    try {
+      let res = await API.get(`/api/user/topup/info`);
+      const { success, data } = res.data;
+      if (success) {
+        setPayMethods(data.pay_methods || []);
+        setMinTopUp(data.min_topup || 1);
+        if (data.pay_methods && data.pay_methods.length > 0) {
+          setSelectedMethod(data.pay_methods[0].type);
+        }
+      }
+    } catch (err) {
+      console.error('获取充值信息失败', err);
+    }
+  };
+
+  const handleOnlinePay = async () => {
+    if (!selectedMethod) {
+      showError('请选择支付方式');
+      return;
+    }
+
+    if (amount < minTopUp) {
+      showError(`充值数量不能小于 ${minTopUp}`);
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      let res;
+      if (selectedMethod === 'stripe') {
+        res = await API.post('/api/user/stripe/pay', {
+          amount: amount,
+          payment_method: 'stripe',
+        });
+      } else if (selectedMethod === 'alipay') {
+        res = await API.post('/api/user/alipay/pay', {
+          amount: amount,
+          payment_method: 'alipay',
+        });
+      } else {
+        showError('不支持的支付方式');
+        return;
+      }
+
+      const { success, message, data } = res.data;
+      if (success && data.pay_link) {
+        window.location.href = data.pay_link;
+      } else {
+        showError(message || '支付创建失败');
+      }
+    } catch (err) {
+      showError('支付请求失败');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   useEffect(() => {
     let status = localStorage.getItem('status');
     if (status) {
@@ -81,6 +145,7 @@ const TopUp = () => {
       }
     }
     getUserQuota().then();
+    getTopUpInfo().then();
   }, []);
 
   return (
@@ -110,7 +175,7 @@ const TopUp = () => {
                   <Card.Header>
                     <Header as='h3' style={{ color: '#2185d0', margin: '1em' }}>
                       <i className='credit card icon'></i>
-                      {t('topup.get_code.title')}
+                      在线充值
                     </Header>
                   </Card.Header>
                   <Card.Description
@@ -139,18 +204,54 @@ const TopUp = () => {
                         </Statistic>
                       </div>
 
-                      <div
-                        style={{ textAlign: 'center', paddingBottom: '1em' }}
-                      >
-                        <Button
-                          primary
-                          size='large'
-                          onClick={openTopUpLink}
-                          style={{ width: '80%' }}
-                        >
-                          {t('topup.get_code.button')}
-                        </Button>
-                      </div>
+                      {payMethods.length > 0 ? (
+                        <div style={{ padding: '1em' }}>
+                          <Form>
+                            <Form.Field>
+                              <label>支付方式</label>
+                              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                                {payMethods.map((method) => (
+                                  <Button
+                                    key={method.type}
+                                    color={selectedMethod === method.type ? 'blue' : 'grey'}
+                                    onClick={() => setSelectedMethod(method.type)}
+                                    style={{
+                                      backgroundColor: selectedMethod === method.type ? method.color : undefined,
+                                    }}
+                                  >
+                                    {method.name}
+                                  </Button>
+                                ))}
+                              </div>
+                            </Form.Field>
+                            <Form.Field>
+                              <label>充值数量</label>
+                              <Form.Input
+                                type='number'
+                                min={minTopUp}
+                                value={amount}
+                                onChange={(e) => setAmount(parseInt(e.target.value) || 0)}
+                                placeholder={`最少 ${minTopUp}`}
+                              />
+                            </Form.Field>
+                            <Button
+                              primary
+                              size='large'
+                              fluid
+                              onClick={handleOnlinePay}
+                              loading={isSubmitting}
+                              disabled={isSubmitting || !selectedMethod}
+                            >
+                              立即充值
+                            </Button>
+                          </Form>
+                        </div>
+                      ) : (
+                        <Message info>
+                          <Message.Header>暂无在线支付方式</Message.Header>
+                          <p>请联系管理员开启在线支付功能</p>
+                        </Message>
+                      )}
                     </div>
                   </Card.Description>
                 </Card.Content>
